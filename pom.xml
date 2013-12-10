@@ -5,6 +5,15 @@
   <version>2.6</version>
   <name>Random-Spawn</name>
   <url>https://github.com/Josvth/Random-Spawn</url>
+  <description>Plugin for bukkit to spawn players in random locations</description>
+
+  <!-- Properties -->
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <project.mainclass>me.josvth.randomspawn.RandomSpawn</project.mainclass>
+    <mc-version>1.7.2</mc-version>
+    <bukkit-ver>R0.1-SNAPSHOT</bukkit-ver>
+  </properties>
 
   <repositories>
     <repository>
@@ -17,15 +26,26 @@
     <dependency>
       <groupId>org.bukkit</groupId>
       <artifactId>bukkit</artifactId>
-      <version>1.6.2-R0.1</version>
+      <version>${mc-version}-${bukkit-ver}</version>
       <type>jar</type>
       <scope>compile</scope>
+    </dependency>
+    <!-- This dependency is mainly just so I don't have to add the jar for runtime debugging, purely laziness -->
+    <dependency>
+      <groupId>org.bukkit</groupId>
+      <artifactId>craftbukkit</artifactId>
+      <version>${mc-version}-${bukkit-ver}</version>
+      <type>jar</type>
+      <scope>runtime</scope>
     </dependency>
   </dependencies>
 
   <build>
     <resources>
       <resource>
+        <includes>
+          <include>plugin.yml</include>
+        </includes>
         <directory>src/main/resources</directory>
         <filtering>true</filtering>
       </resource>

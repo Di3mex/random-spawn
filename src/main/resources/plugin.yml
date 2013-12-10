@@ -1,6 +1,7 @@
-name: Random Spawn
-version: 2.6
-main: me.josvth.randomspawn.RandomSpawn
+name: ${project.artifactId}
+main: ${project.mainclass}
+version: ${project.version}
+description: ${project.description}
 author: Josvth
 commands:
   randomspawn:
