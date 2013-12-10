@@ -14,7 +14,6 @@ public class DamageListener implements Listener{
 	
 	public DamageListener(RandomSpawn instance){
 		plugin = instance;
-		plugin.getServer().getPluginManager().registerEvents(this, plugin);
 	}
 	
 	@EventHandler

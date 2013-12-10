@@ -19,7 +19,6 @@ public class RespawnListener implements Listener{
 	
 	public RespawnListener (RandomSpawn instance){
 		plugin = instance;
-		plugin.getServer().getPluginManager().registerEvents(this, plugin);
 	}
 	
 	@EventHandler

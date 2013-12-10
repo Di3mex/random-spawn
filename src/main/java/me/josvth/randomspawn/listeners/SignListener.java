@@ -21,7 +21,6 @@ public class SignListener implements Listener {
 
 	public SignListener(RandomSpawn instance) {
 		plugin = instance;
-		plugin.getServer().getPluginManager().registerEvents(this, plugin);
 	}
 
 	@EventHandler

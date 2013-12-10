@@ -1,6 +1,5 @@
 package me.josvth.randomspawn;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -21,12 +20,6 @@ public class RandomSpawn extends JavaPlugin{
 	public YamlHandler yamlHandler;
 	CommandHandler commandHandler;
 
-	RespawnListener respawnListener;
-	JoinListener joinListener;
-	WorldChangeListener worldChangeListener;
-	SignListener signListener;
-	DamageListener damageListener;
-
 	@Override
 	public void onEnable() {
 
@@ -38,12 +31,11 @@ public class RandomSpawn extends JavaPlugin{
 		logDebug("Commands registered!");
 
 		//setup listeners
-		respawnListener = new RespawnListener(this);
-		joinListener = new JoinListener(this);
-		worldChangeListener = new WorldChangeListener(this);
-		signListener = new SignListener(this);
-		damageListener = new DamageListener(this);
-
+		getServer().getPluginManager().registerEvents(new RespawnListener(this), this);
+        getServer().getPluginManager().registerEvents(new JoinListener(this), this);
+        getServer().getPluginManager().registerEvents(new WorldChangeListener(this), this);
+        getServer().getPluginManager().registerEvents(new SignListener(this), this);
+        getServer().getPluginManager().registerEvents(new DamageListener(this), this);
 	}
 
 	public void logInfo(String message){
@@ -67,12 +59,12 @@ public class RandomSpawn extends JavaPlugin{
 		String worldName = world.getName();
 
 		// I don't like this method
-		List<Integer> blacklist = new ArrayList<Integer>();
+		List<Integer> blacklist;
 		
 		if( yamlHandler.worlds.contains( worldName + ".spawnblacklist") )
 			blacklist = yamlHandler.worlds.getIntegerList(worldName + ".spawnblacklist");
 		else
-			blacklist = Arrays.asList(new Integer[]{8,9,10,11,18,51,81});			
+			blacklist = Arrays.asList(8,9,10,11,18,51,81);
 	
 		double xmin = yamlHandler.worlds.getDouble(worldName +".spawnarea.x-min", -100);
 		double xmax = yamlHandler.worlds.getDouble(worldName +".spawnarea.x-max", 100);

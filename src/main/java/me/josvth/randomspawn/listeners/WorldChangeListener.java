@@ -19,7 +19,6 @@ public class WorldChangeListener implements Listener {
 
 	public WorldChangeListener(RandomSpawn instance){
 		plugin = instance;
-		plugin.getServer().getPluginManager().registerEvents(this, plugin);
 	}
 
 	@EventHandler

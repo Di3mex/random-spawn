@@ -22,7 +22,6 @@ public class JoinListener implements Listener{
 
 	public JoinListener(RandomSpawn instance) {
 		plugin = instance;
-		plugin.getServer().getPluginManager().registerEvents(this, plugin);
 	}
 
 	@EventHandler
@@ -42,8 +41,6 @@ public class JoinListener implements Listener{
 		if(world.getEnvironment().equals(Environment.NETHER) || world.getEnvironment().equals(Environment.THE_END)) return;
 
 		if(player.hasPlayedBefore()) return;
-		
-		//if(!plugin.isFirstJoin(player, world)) return;
 
 		List<String> randomSpawnFlags = plugin.yamlHandler.worlds.getStringList(worldName + ".randomspawnon");
 
@@ -59,8 +56,6 @@ public class JoinListener implements Listener{
 		}
 
 		Location spawnLocation = plugin.chooseSpawn(world);
-		
-		//player.sendMessage("You should be random spawned at: " + spawnLocation.getX() + "," + spawnLocation.getY() + "," + spawnLocation.getX());
 		
 		plugin.sendGround(player, spawnLocation);
 		
