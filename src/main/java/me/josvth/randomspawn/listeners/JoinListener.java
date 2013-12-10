@@ -24,11 +24,23 @@ public class JoinListener implements Listener{
 		plugin = instance;
 	}
 
+
+    /**
+     * Makes sure that a player teleports to a safe location by sending the player the blocks he is standing on first to prevent him from glitching into the floor
+     *
+     * @param event event that occurred
+     */
 	@EventHandler
 	public void onPlayerTeleport(PlayerTeleportEvent event){ 
 		plugin.sendGround(event.getPlayer(), event.getTo());
 	}
 
+
+    /**
+     * Only handles spawns on first login
+     *
+     * @param event event that occurred
+     */
 	@EventHandler
 	public void onPlayerJoin(PlayerJoinEvent event){
 
@@ -45,7 +57,7 @@ public class JoinListener implements Listener{
 		List<String> randomSpawnFlags = plugin.yamlHandler.worlds.getStringList(worldName + ".randomspawnon");
 
 		if (!randomSpawnFlags.contains("firstjoin")){ 
-			player.teleport(getFirstSpawn(world));
+			player.teleport(plugin.yamlHandler.getFirstSpawn(world));
 			plugin.logDebug(playerName + " is teleported to the first spawn of " + worldName);
 			return; 
 		}
@@ -72,6 +84,12 @@ public class JoinListener implements Listener{
 		}
 	}
 
+
+    /**
+     * This does exactly what???
+     *
+     * @param event event that occurred
+     */
 	@EventHandler
 	public void onPlayerKick(PlayerKickEvent event){
 		if(event.getPlayer().hasMetadata("lasttimerandomspawned")){
@@ -81,28 +99,6 @@ public class JoinListener implements Listener{
 				event.setCancelled(true);
 			}
 		}
-	}
-	
-	private Location getFirstSpawn(World world) {
-		String worldName = world.getName();
-
-		if (plugin.yamlHandler.worlds.contains(worldName +".firstspawn")){
-
-			double x = plugin.yamlHandler.worlds.getDouble(worldName+".firstspawn.x");
-			double y = plugin.yamlHandler.worlds.getDouble(worldName+".firstspawn.y");
-			double z = plugin.yamlHandler.worlds.getDouble(worldName+".firstspawn.z");
-
-			double dyaw = plugin.yamlHandler.worlds.getDouble(worldName+".firstspawn.yaw");
-			double dpitch = plugin.yamlHandler.worlds.getDouble(worldName+".firstspawn.pitch");
-
-			float yaw = (float)dyaw;
-			float pitch = (float)dpitch;
-
-			return new Location(world,x,y,z,yaw,pitch);
-
-		}
-
-		return world.getSpawnLocation();
 	}
 
 }

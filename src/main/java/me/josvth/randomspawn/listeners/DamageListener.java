@@ -15,7 +15,8 @@ public class DamageListener implements Listener{
 	public DamageListener(RandomSpawn instance){
 		plugin = instance;
 	}
-	
+
+    //TODO What does this do
 	@EventHandler
 	public void onDamage(EntityDamageEvent event){
 		if(event.getEntity() instanceof Player && event.getEntity().hasMetadata("lasttimerandomspawned") && !event.getCause().equals(DamageCause.SUICIDE)){
