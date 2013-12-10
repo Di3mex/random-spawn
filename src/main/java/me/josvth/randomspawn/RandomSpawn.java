@@ -31,11 +31,7 @@ public class RandomSpawn extends JavaPlugin{
 		logDebug("Commands registered!");
 
 		//setup listeners
-		getServer().getPluginManager().registerEvents(new RespawnListener(this), this);
-        getServer().getPluginManager().registerEvents(new JoinListener(this), this);
-        getServer().getPluginManager().registerEvents(new WorldChangeListener(this), this);
-        getServer().getPluginManager().registerEvents(new SignListener(this), this);
-        getServer().getPluginManager().registerEvents(new DamageListener(this), this);
+		getServer().getPluginManager().registerEvents(new Listeners(this), this);
 	}
 
 	public void logInfo(String message){
