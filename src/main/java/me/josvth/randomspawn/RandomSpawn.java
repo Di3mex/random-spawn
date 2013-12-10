@@ -3,7 +3,6 @@ package me.josvth.randomspawn;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.logging.Logger;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -63,12 +62,6 @@ public class RandomSpawn extends JavaPlugin{
 		player.sendMessage(ChatColor.AQUA + "[RandomSpawn] " + ChatColor.RESET + message);
 	}
 
-	// *------------------------------------------------------------------------------------------------------------*
-	// | The following chooseSpawn method contains code made by NuclearW                                            |
-	// | based on his SpawnArea plugin:                                                                             |
-	// | http://forums.bukkit.org/threads/tp-spawnarea-v0-1-spawns-targetPlayers-in-a-set-area-randomly-1060.20408/ |
-	// *------------------------------------------------------------------------------------------------------------*
-
 	public Location chooseSpawn(World world){
 
 		String worldName = world.getName();
@@ -91,76 +84,102 @@ public class RandomSpawn extends JavaPlugin{
 
 		String type = yamlHandler.worlds.getString(worldName +".spawnarea.type", "square");
 				
-		double xrand = 0;
-		double zrand = 0;
-		double y = -1;
-		
-		if(type.equalsIgnoreCase("circle")){
-
-			double xcenter = xmin + (xmax - xmin)/2;
-			double zcenter = zmin + (zmax - zmin)/2;
-			
-			do {
-
-				double r = Math.random() * (xmax - xcenter);
-				double phi = Math.random() * 2 * Math.PI;
-
-				xrand = xcenter + Math.cos(phi) * r;
-				zrand = zcenter + Math.sin(phi) * r;
-
-				y = getValidHighestY(world, xrand, zrand, blacklist);
-								
-			} while (y == -1);
-
-
-		} else {
-
-			if(thickness <= 0){
-
-				do {
-					
-					xrand = xmin + Math.random()*(xmax - xmin + 1);
-					zrand = zmin + Math.random()*(zmax - zmin + 1);
-
-					y = getValidHighestY(world, xrand, zrand, blacklist);
-
-				} while (y == -1);
-
-			}else {
-
-				do {
-					
-					int side = (int) (Math.random() * 4d);
-					double borderOffset = Math.random() * (double) thickness;
-					if (side == 0) {
-						xrand = xmin + borderOffset;
-						// Also balancing probability considering thickness
-						zrand = zmin + Math.random() * (zmax - zmin + 1 - 2*thickness) + thickness;
-					}
-					else if (side == 1) {
-						xrand = xmax - borderOffset;
-						zrand = zmin + Math.random() * (zmax - zmin + 1 - 2*thickness) + thickness;
-					}
-					else if (side == 2) {
-						xrand = xmin + Math.random() * (xmax - xmin + 1);
-						zrand = zmin + borderOffset;
-					}
-					else {
-						xrand = xmin + Math.random() * (xmax - xmin + 1);
-						zrand = zmax - borderOffset;
-					}
-
-					y = getValidHighestY(world, xrand, zrand, blacklist);
-
-				} while (y == -1);
-				
-			}
-		}
-	
-		Location location = new Location(world, xrand, y, zrand);
-				
-		return location;
+		return getRandomSpawn(world, blacklist, xmin, xmax, zmin, zmax, thickness, type);
 	}
+
+
+    /**
+     * Choose a random spawn location
+     *
+     * The following method contains code made by NuclearW
+     * based on his SpawnArea plugin:
+     * http://forums.bukkit.org/threads/tp-spawnarea-v0-1-spawns-targetPlayers-in-a-set-area-randomly-1060.20408/
+     *
+     * @param world the world to look in
+     * @param blacklist list of blockids that are not acceptable for spawning a player
+     *
+     * @param xmin minimum x
+     * @param xmax maximum x
+     * @param zmin minimum z
+     * @param zmax maximum z
+     *
+     * @param thickness some value, maybe like a border? I don't know
+     * @param type the area to look in can be circle or square
+     *
+     * @return the choosen location
+     */
+    //TODO why is it a double?
+    //TODO what does thickness do?
+    public Location getRandomSpawn(World world, List<Integer> blacklist, double xmin, double xmax, double zmin, double zmax, int thickness, String type)
+    {
+        double xrand = 0;
+        double zrand = 0;
+        double y = -1;
+
+        if(type.equalsIgnoreCase("circle")){
+
+            double xcenter = xmin + (xmax - xmin)/2;
+            double zcenter = zmin + (zmax - zmin)/2;
+
+            do {
+
+                double r = Math.random() * (xmax - xcenter);
+                double phi = Math.random() * 2 * Math.PI;
+
+                xrand = xcenter + Math.cos(phi) * r;
+                zrand = zcenter + Math.sin(phi) * r;
+
+                y = getValidHighestY(world, xrand, zrand, blacklist);
+
+            } while (y == -1);
+
+
+        } else {
+
+            if(thickness <= 0){
+
+                do {
+
+                    xrand = xmin + Math.random()*(xmax - xmin + 1);
+                    zrand = zmin + Math.random()*(zmax - zmin + 1);
+
+                    y = getValidHighestY(world, xrand, zrand, blacklist);
+
+                } while (y == -1);
+
+            }else {
+
+                do {
+
+                    int side = (int) (Math.random() * 4d);
+                    double borderOffset = Math.random() * (double) thickness;
+                    if (side == 0) {
+                        xrand = xmin + borderOffset;
+                        // Also balancing probability considering thickness
+                        zrand = zmin + Math.random() * (zmax - zmin + 1 - 2*thickness) + thickness;
+                    }
+                    else if (side == 1) {
+                        xrand = xmax - borderOffset;
+                        zrand = zmin + Math.random() * (zmax - zmin + 1 - 2*thickness) + thickness;
+                    }
+                    else if (side == 2) {
+                        xrand = xmin + Math.random() * (xmax - xmin + 1);
+                        zrand = zmin + borderOffset;
+                    }
+                    else {
+                        xrand = xmin + Math.random() * (xmax - xmin + 1);
+                        zrand = zmax - borderOffset;
+                    }
+
+                    y = getValidHighestY(world, xrand, zrand, blacklist);
+
+                } while (y == -1);
+
+            }
+        }
+        return new Location(world, xrand, y, zrand);
+    }
+
 
 	private double getValidHighestY(World world, double x, double z, List<Integer> blacklist) {
 		
