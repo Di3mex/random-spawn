@@ -1,10 +1,11 @@
 package me.josvth.randomspawn.commands;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import me.josvth.randomspawn.RandomSpawn;
 
+import me.josvth.randomspawn.handlers.WorldConfig;
+import me.josvth.randomspawn.handlers.WorldConfigNode;
 import org.bukkit.Location;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -23,6 +24,8 @@ public class SetAreaCommand extends AbstractCommand{
 		double zmin = 0;
 		double zmax = 0;
 
+        WorldConfig cfg = plugin.getWorldConfig();
+
 		if (args.size() == 1) {
 			Location reference = player.getLocation();
 
@@ -38,14 +41,14 @@ public class SetAreaCommand extends AbstractCommand{
 
 			String worldname = reference.getWorld().getName();
 
-			plugin.yamlHandler.worlds.set(worldname + ".spawnarea.x-min", xmin);
-			plugin.yamlHandler.worlds.set(worldname + ".spawnarea.x-max", xmax);
-			plugin.yamlHandler.worlds.set(worldname + ".spawnarea.z-min", zmin);
-			plugin.yamlHandler.worlds.set(worldname + ".spawnarea.z-max", zmax);
+            cfg.set(worldname, WorldConfigNode.RESPAWN_X_MIN, xmin);
+            cfg.set(worldname, WorldConfigNode.RESPAWN_X_MIN, xmax);
+            cfg.set(worldname, WorldConfigNode.RESPAWN_X_MIN, zmin);
+            cfg.set(worldname, WorldConfigNode.RESPAWN_X_MIN, zmax);
+            cfg.set(worldname, WorldConfigNode.RDM_RESPAWN, true);
 
-			plugin.yamlHandler.worlds.set(worldname + ".randomspawnenabled", true);
-
-			plugin.yamlHandler.saveWorlds();
+            cfg.save();
+            cfg.reload();
 
 			plugin.playerInfo(player,  "Spawn area set!");
 
@@ -70,25 +73,22 @@ public class SetAreaCommand extends AbstractCommand{
 
 			String worldname = reference.getWorld().getName();
 
-			plugin.yamlHandler.worlds.set(worldname + ".spawnarea.x-min", xmin);
-			plugin.yamlHandler.worlds.set(worldname + ".spawnarea.x-max", xmax);
-			plugin.yamlHandler.worlds.set(worldname + ".spawnarea.z-min", zmin);
-			plugin.yamlHandler.worlds.set(worldname + ".spawnarea.z-max", zmax);
-
-			List<String> rsflags = new ArrayList<String>();
-			rsflags.add("respawn");
-
-			plugin.yamlHandler.worlds.set(worldname + ".randomspawnon", rsflags);
+            cfg.set(worldname, WorldConfigNode.RESPAWN_X_MIN, xmin);
+            cfg.set(worldname, WorldConfigNode.RESPAWN_X_MIN, xmax);
+            cfg.set(worldname, WorldConfigNode.RESPAWN_X_MIN, zmin);
+            cfg.set(worldname, WorldConfigNode.RESPAWN_X_MIN, zmax);
+            cfg.set(worldname, WorldConfigNode.RDM_RESPAWN, true);
 
 			if (args.get(0).matches("circle")) {
-				plugin.yamlHandler.worlds.set(worldname + ".spawnarea.type", "circle");
+                cfg.set(worldname, WorldConfigNode.RDM_SEARCHTYPE, "circle");
 			}else{
-				plugin.yamlHandler.worlds.set(worldname + ".spawnarea.type", "square");
+                cfg.set(worldname, WorldConfigNode.RDM_SEARCHTYPE, "square");
 			}
 
 			plugin.playerInfo(player, "Spawn area set!");
 
-			plugin.yamlHandler.saveWorlds();
+			cfg.save();
+            cfg.reload();
 
 			return true;
 		}
@@ -110,17 +110,14 @@ public class SetAreaCommand extends AbstractCommand{
 
 			String worldname = reference.getWorld().getName();
 
-			plugin.yamlHandler.worlds.set(worldname + ".spawnarea.x-min", xmin);
-			plugin.yamlHandler.worlds.set(worldname + ".spawnarea.x-max", xmax);
-			plugin.yamlHandler.worlds.set(worldname + ".spawnarea.z-min", zmin);
-			plugin.yamlHandler.worlds.set(worldname + ".spawnarea.z-max", zmax);
-
-			List<String> rsflags = new ArrayList<String>();
-			rsflags.add("respawn");
-
-			plugin.yamlHandler.worlds.set(worldname + ".randomspawnon", rsflags);
+            cfg.set(worldname, WorldConfigNode.RESPAWN_X_MIN, xmin);
+            cfg.set(worldname, WorldConfigNode.RESPAWN_X_MIN, xmax);
+            cfg.set(worldname, WorldConfigNode.RESPAWN_X_MIN, zmin);
+            cfg.set(worldname, WorldConfigNode.RESPAWN_X_MIN, zmax);
+            cfg.set(worldname, WorldConfigNode.RDM_RESPAWN, true);
 			
-			plugin.yamlHandler.saveWorlds();
+			cfg.save();
+            cfg.reload();
 
 			plugin.playerInfo(player,  "Spawn area set!");
 
@@ -144,17 +141,14 @@ public class SetAreaCommand extends AbstractCommand{
 
 			String worldname = reference.getWorld().getName();
 
-			plugin.yamlHandler.worlds.set(worldname + ".spawnarea.x-min", xmin);
-			plugin.yamlHandler.worlds.set(worldname + ".spawnarea.x-max", xmax);
-			plugin.yamlHandler.worlds.set(worldname + ".spawnarea.z-min", zmin);
-			plugin.yamlHandler.worlds.set(worldname + ".spawnarea.z-max", zmax);
+            cfg.set(worldname, WorldConfigNode.RESPAWN_X_MIN, xmin);
+            cfg.set(worldname, WorldConfigNode.RESPAWN_X_MIN, xmax);
+            cfg.set(worldname, WorldConfigNode.RESPAWN_X_MIN, zmin);
+            cfg.set(worldname, WorldConfigNode.RESPAWN_X_MIN, zmax);
+            cfg.set(worldname, WorldConfigNode.RDM_RESPAWN, true);
 
-			List<String> rsflags = new ArrayList<String>();
-			rsflags.add("respawn");
-
-			plugin.yamlHandler.worlds.set(worldname + ".randomspawnon", rsflags);
-			
-			plugin.yamlHandler.saveWorlds();
+            cfg.save();
+            cfg.reload();
 
 			plugin.playerInfo(player,  "Spawn area set!");
 

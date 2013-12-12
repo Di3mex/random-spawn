@@ -1,8 +1,8 @@
 package me.josvth.randomspawn;
 
-import java.util.Arrays;
-import java.util.List;
 
+import me.josvth.randomspawn.handlers.*;
+import me.josvth.randomspawn.listeners.Listeners;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -11,14 +11,14 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import me.josvth.randomspawn.handlers.CommandHandler;
-import me.josvth.randomspawn.handlers.YamlHandler;
-import me.josvth.randomspawn.listeners.*;
+import java.util.List;
 
 public class RandomSpawn extends JavaPlugin{
 
 	public YamlHandler yamlHandler;
 	CommandHandler commandHandler;
+    private GlobalConfig globalConfig;
+    private WorldConfig worldConfig;
 
 	@Override
 	public void onEnable() {
@@ -30,16 +30,30 @@ public class RandomSpawn extends JavaPlugin{
 		commandHandler = new CommandHandler(this);
 		logDebug("Commands registered!");
 
+        //Has to be before listeners because listeners need the configs to setup
+        globalConfig = new GlobalConfig(this);
+        worldConfig = new WorldConfig(this);
+
 		//setup listeners
 		getServer().getPluginManager().registerEvents(new Listeners(this), this);
 	}
+
+    public GlobalConfig getGlobalConfig()
+    {
+        return globalConfig;
+    }
+
+    public WorldConfig getWorldConfig()
+    {
+        return worldConfig;
+    }
 
 	public void logInfo(String message){
 		getLogger().info(message);
 	}
 
 	public void logDebug(String message){
-		if (yamlHandler.config.getBoolean("debug",false)) { getLogger().info("(DEBUG) " + message); }
+		if (globalConfig.getBoolean(GlobalConfigNode.DEBUG)) { getLogger().info("(DEBUG) " + message); }
 	}
 
 	public void logWarning(String message){
@@ -54,23 +68,18 @@ public class RandomSpawn extends JavaPlugin{
 
 		String worldName = world.getName();
 
-		// I don't like this method
-		List<Integer> blacklist;
-		
-		if( yamlHandler.worlds.contains( worldName + ".spawnblacklist") )
-			blacklist = yamlHandler.worlds.getIntegerList(worldName + ".spawnblacklist");
-		else
-			blacklist = Arrays.asList(8,9,10,11,18,51,81);
-	
-		double xmin = yamlHandler.worlds.getDouble(worldName +".spawnarea.x-min", -100);
-		double xmax = yamlHandler.worlds.getDouble(worldName +".spawnarea.x-max", 100);
-		double zmin = yamlHandler.worlds.getDouble(worldName +".spawnarea.z-min", -100);
-		double zmax = yamlHandler.worlds.getDouble(worldName +".spawnarea.z-max", 100);
+
+		List<Integer> blacklist = worldConfig.getIntegerList(WorldConfigNode.BLACKLISTED_BLOCKS, worldName);
+
+		double xmin = worldConfig.getDouble(WorldConfigNode.RDM_X_MIN, world); //yamlHandler.worlds.getDouble(worldName +".spawnarea.x-min", -100);
+		double xmax = worldConfig.getDouble(WorldConfigNode.RDM_X_MAX, world); //yamlHandler.worlds.getDouble(worldName +".spawnarea.x-max", 100);
+		double zmin = worldConfig.getDouble(WorldConfigNode.RDM_Z_MIN, world); //yamlHandler.worlds.getDouble(worldName +".spawnarea.z-min", -100);
+		double zmax = worldConfig.getDouble(WorldConfigNode.RDM_Z_MAX, world); //yamlHandler.worlds.getDouble(worldName +".spawnarea.z-max", 100);
 				
 		// Spawn area thickness near border. If 0 spawns whole area
-		int thickness = yamlHandler.worlds.getInt(worldName +".spawnarea.thickness", 0);
+		int thickness = worldConfig.getInt(WorldConfigNode.RDM_THICKNESS, world); //yamlHandler.worlds.getInt(worldName +".spawnarea.thickness", 0);
 
-		String type = yamlHandler.worlds.getString(worldName +".spawnarea.type", "square");
+		String type = worldConfig.getString(WorldConfigNode.RDM_SEARCHTYPE, worldName); //yamlHandler.worlds.getString(worldName +".spawnarea.type", "square");
 				
 		return getRandomSpawn(world, blacklist, xmin, xmax, zmin, zmax, thickness, type);
 	}

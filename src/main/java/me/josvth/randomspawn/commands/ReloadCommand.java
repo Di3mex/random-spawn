@@ -15,19 +15,19 @@ public class ReloadCommand extends AbstractCommand {
 	public boolean onCommand(CommandSender sender, List<String> args){
 
 		if (args.size() == 0) {
-			plugin.yamlHandler.loadYamls();
+			//plugin.yamlHandler.loadYamls();
 			sender.sendMessage( "Random Spawn configurations reloaded!" );
 			return true;
 		}
 
 		if (args.get(0).matches("config")) {
-			plugin.yamlHandler.loadConfig();
+			plugin.getGlobalConfig().reload();
 			sender.sendMessage( "Random Spawn config file is reloaded!");
 			return true;
 		}
 
 		if (args.get(0).matches("worlds")) {
-			plugin.yamlHandler.loadWorlds();
+            plugin.getWorldConfig().reload();
 			sender.sendMessage( "Random Spawn worlds file reloaded!");
 			return true;
 		}

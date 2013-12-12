@@ -4,6 +4,9 @@ import java.util.List;
 
 import me.josvth.randomspawn.RandomSpawn;
 
+import me.josvth.randomspawn.handlers.WorldConfig;
+import me.josvth.randomspawn.handlers.WorldConfigNode;
+import org.bukkit.World;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
@@ -16,39 +19,41 @@ public class BedsCommand extends AbstractCommand{
 	public boolean onCommand(CommandSender sender, List<String> args){
 		
 		Player player = (Player) sender;
-		String worldName = player.getWorld().getName();
-		
-		List<String> randomSpawnFlags = plugin.yamlHandler.worlds.getStringList(worldName + ".randomspawnon");
-		
+		World world = player.getWorld();
+
+        WorldConfig cfg = plugin.getWorldConfig();
+
+        final boolean cfgBedRespawn = cfg.getBoolean(WorldConfigNode.RDM_BEDRESPAWN, world);
+
 		if (args.size() == 0){
-			if (randomSpawnFlags.contains("bedrespawn")){
-				randomSpawnFlags.remove("bedrespawn");
-				plugin.yamlHandler.worlds.set(worldName + ".randomspawnon", randomSpawnFlags);
-				plugin.playerInfo((Player)sender, "Beds will now work like normal.");				
-				plugin.yamlHandler.saveWorlds();
+			if (cfgBedRespawn){
+                cfg.set(world, WorldConfigNode.RDM_BEDRESPAWN, false);
+				plugin.playerInfo((Player)sender, "Beds will now work like normal.");
+				cfg.save();
+                cfg.reload();
 				return true;
 			}else{
-				randomSpawnFlags.add("bedrespawn");
-				plugin.yamlHandler.worlds.set(worldName + ".randomspawnon", randomSpawnFlags);
+                cfg.set(world, WorldConfigNode.RDM_BEDRESPAWN, true);
 				plugin.playerInfo((Player)sender, "Beds are now disabled.");
-				plugin.yamlHandler.saveWorlds();
+                cfg.save();
+                cfg.reload();
 				return true;
 			}
 		}
 		
 		if (args.size() == 1){
 			if (args.get(0).matches("true")){
-				randomSpawnFlags.add("bedrespawn");
-				plugin.yamlHandler.worlds.set(worldName + ".randomspawnon", randomSpawnFlags);
-				plugin.playerInfo((Player)sender, "Beds are now disabled.");				
-				plugin.yamlHandler.saveWorlds();
+                cfg.set(world, WorldConfigNode.RDM_BEDRESPAWN, true);
+                plugin.playerInfo((Player) sender, "Beds are now disabled.");
+                cfg.save();
+                cfg.reload();
 				return true;
 			}
-			if (args.get(0).matches("false")){
-				randomSpawnFlags.remove("bedrespawn");
-				plugin.yamlHandler.worlds.set(worldName + ".randomspawnon", randomSpawnFlags);
-				plugin.playerInfo((Player)sender, "Beds will now work like normal.");
-				plugin.yamlHandler.saveWorlds();
+			else if (args.get(0).matches("false")){
+                cfg.set(world, WorldConfigNode.RDM_BEDRESPAWN, false);
+                plugin.playerInfo((Player) sender, "Beds will now work like normal.");
+                cfg.save();
+                cfg.reload();
 				return true;
 			}
 			

@@ -4,6 +4,11 @@ import java.util.List;
 
 import me.josvth.randomspawn.RandomSpawn;
 
+import me.josvth.randomspawn.handlers.GlobalConfig;
+import me.josvth.randomspawn.handlers.GlobalConfigNode;
+import me.josvth.randomspawn.handlers.WorldConfig;
+import me.josvth.randomspawn.handlers.WorldConfigNode;
+import me.josvth.randomspawn.listeners.Listeners;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -22,7 +27,10 @@ public class SpawnCommand extends AbstractCommand {
 		
 		Player target = null;
 		World world = null;
-		
+
+        WorldConfig cfg = plugin.getWorldConfig();
+        GlobalConfig globalCfg = plugin.getGlobalConfig();
+
 		if (args.size() == 0) {
 			target = (Player) sender;
 			world = target.getWorld();
@@ -56,11 +64,11 @@ public class SpawnCommand extends AbstractCommand {
 		
 		target.setMetadata("lasttimerandomspawned", new FixedMetadataValue(plugin, System.currentTimeMillis()));
 		
-		if (plugin.yamlHandler.worlds.getBoolean(world.getName() + ".keeprandomspawns",false))
+		if (cfg.getBoolean(WorldConfigNode.SAVE_SPAWN_AS_BED, world))
 			target.setBedSpawnLocation(spawn);
 
-		if (plugin.yamlHandler.config.getString("messages.randomspawned") != null)
-			target.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.yamlHandler.config.getString("messages.randomspawned")));
+		if (globalCfg.getBoolean(GlobalConfigNode.SHOW_RDM_SPAWN_MSG))
+            Listeners.showRdmRespawnMsg(target, globalCfg);
 				
 		if(target != sender)
 			sender.sendMessage("Player: "+ target.getName() + " was random teleported!");

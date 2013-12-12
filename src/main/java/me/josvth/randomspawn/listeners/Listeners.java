@@ -2,6 +2,10 @@ package me.josvth.randomspawn.listeners;
 
 
 import me.josvth.randomspawn.RandomSpawn;
+import me.josvth.randomspawn.handlers.GlobalConfig;
+import me.josvth.randomspawn.handlers.GlobalConfigNode;
+import me.josvth.randomspawn.handlers.WorldConfig;
+import me.josvth.randomspawn.handlers.WorldConfigNode;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -18,24 +22,28 @@ import org.bukkit.event.player.*;
 import org.bukkit.metadata.FixedMetadataValue;
 
 import java.util.List;
+import java.util.Random;
 
 /**
- * @author Diemex
+ * All the events that rs listens to
  */
-public class Listeners implements Listener
-{
+public class Listeners implements Listener{
+
+    private final WorldConfig worldConfig;
+    private final GlobalConfig globalConfig;
     RandomSpawn plugin;
 
-    public Listeners (RandomSpawn plugin)
-    {
+    public Listeners (RandomSpawn plugin){
         this.plugin = plugin;
+        worldConfig = plugin.getWorldConfig();
+        globalConfig = plugin.getGlobalConfig();
     }
 
     //TODO What does this do
     @EventHandler
     public void onDamage(EntityDamageEvent event){
         if(event.getEntity() instanceof Player && event.getEntity().hasMetadata("lasttimerandomspawned") && !event.getCause().equals(EntityDamageEvent.DamageCause.SUICIDE)){
-            if((event.getEntity().getMetadata("lasttimerandomspawned").get(0).asLong() + (plugin.yamlHandler.config.getInt("nodamagetime",5)*1000)) > System.currentTimeMillis()){
+            if((event.getEntity().getMetadata("lasttimerandomspawned").get(0).asLong() + (globalConfig.getInt(GlobalConfigNode.NO_DMG_TIME)*1000)) > System.currentTimeMillis()){
                 event.setCancelled(true);
             }
         }
@@ -70,10 +78,11 @@ public class Listeners implements Listener
 
         if(player.hasPlayedBefore()) return;
 
-        List<String> randomSpawnFlags = plugin.yamlHandler.worlds.getStringList(worldName + ".randomspawnon");
+        final boolean cfgRdmFirstJoin = worldConfig.getBoolean(WorldConfigNode.RDM_RESPAWN, world);
+        final boolean cfgSaveBedRespawn  = worldConfig.getBoolean(WorldConfigNode.SAVE_SPAWN_AS_BED, world);
 
-        if (!randomSpawnFlags.contains("firstjoin")){
-            player.teleport(plugin.yamlHandler.getFirstSpawn(world));
+        if (!cfgRdmFirstJoin){
+            player.teleport(worldConfig.getFirstSpawn(world));
             plugin.logDebug(playerName + " is teleported to the first spawn of " + worldName);
             return;
         }
@@ -91,13 +100,11 @@ public class Listeners implements Listener
 
         player.setMetadata("lasttimerandomspawned", new FixedMetadataValue(plugin, System.currentTimeMillis()));
 
-        if (plugin.yamlHandler.worlds.getBoolean(worldName + ".keeprandomspawns",false)){
+        if (cfgSaveBedRespawn){
             player.setBedSpawnLocation(spawnLocation);
         }
 
-        if (plugin.yamlHandler.config.getString("messages.randomspawned") != null){
-            player.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.yamlHandler.config.getString("messages.randomspawned")));
-        }
+        showRdmRespawnMsg(player, globalConfig);
     }
 
 
@@ -109,7 +116,7 @@ public class Listeners implements Listener
     @EventHandler
     public void onPlayerKick(PlayerKickEvent event){
         if(event.getPlayer().hasMetadata("lasttimerandomspawned")){
-            if((event.getPlayer().getMetadata("lasttimerandomspawned").get(0).asLong() + (plugin.yamlHandler.config.getInt("nodamagetime",5)*1000)) > System.currentTimeMillis()){
+            if((event.getPlayer().getMetadata("lasttimerandomspawned").get(0).asLong() + (globalConfig.getInt(GlobalConfigNode.NO_DMG_TIME)*1000)) > System.currentTimeMillis()){
                 event.setReason("");
                 event.setLeaveMessage("");
                 event.setCancelled(true);
@@ -131,20 +138,22 @@ public class Listeners implements Listener
         World world = event.getRespawnLocation().getWorld();
         String worldName = world.getName();
 
-        List<String> randomSpawnFlags = plugin.yamlHandler.worlds.getStringList(worldName + ".randomspawnon");
+        final boolean cfgRdmRespawn = worldConfig.getBoolean(WorldConfigNode.RDM_RESPAWN, world);
+        final boolean cfgRdmBedRespawn = worldConfig.getBoolean(WorldConfigNode.RDM_BEDRESPAWN, world);
+        final boolean cfgSaveBedRespawn  = worldConfig.getBoolean(WorldConfigNode.SAVE_SPAWN_AS_BED, world);
 
-        if (event.isBedSpawn() && !randomSpawnFlags.contains("bedrespawn")){  		// checks if player should be spawned at his bed
+        if (event.isBedSpawn() && !cfgRdmBedRespawn){  		// checks if player should be spawned at his bed
             plugin.logDebug(playerName + " is spawned at his bed!");
             return;
         }
 
-        if (plugin.yamlHandler.worlds.getBoolean(worldName + ".keeprandomspawns", false) && player.getBedSpawnLocation() != null ){
+        if (cfgSaveBedRespawn && player.getBedSpawnLocation() != null ){
             event.setRespawnLocation(player.getBedSpawnLocation());
             plugin.logDebug(playerName + " is spawned at his saved spawn.");
             return;
         }
 
-        if (randomSpawnFlags.contains("respawn")){
+        if (cfgRdmRespawn){
 
             Location spawnLocation = plugin.chooseSpawn(world);
 
@@ -156,13 +165,11 @@ public class Listeners implements Listener
 
             player.setMetadata("lasttimerandomspawned", new FixedMetadataValue(plugin, System.currentTimeMillis()));
 
-            if (plugin.yamlHandler.worlds.getBoolean(worldName + ".keeprandomspawns",false)){
+            if (cfgSaveBedRespawn){
                 player.setBedSpawnLocation(spawnLocation);
             }
 
-            if (plugin.yamlHandler.config.getString("messages.randomspawned") != null){
-                player.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.yamlHandler.config.getString("messages.randomspawned")));
-            }
+            showRdmRespawnMsg(player, globalConfig);
         }
     }
 
@@ -173,21 +180,23 @@ public class Listeners implements Listener
             if (block.getTypeId() == 68 || block.getTypeId() == 63){
                 Sign sign = (Sign)block.getState();
                 final Player player = event.getPlayer();
-                if (sign.getLine(0).equalsIgnoreCase(plugin.yamlHandler.config.getString("rs-sign-text","[RandomSpawn]") ) ){
+                if (sign.getLine(0).equalsIgnoreCase(globalConfig.getString(GlobalConfigNode.SIGN_TEXT) ) ){
 
                     if (player.hasPermission("RandomSpawn.usesign")){
 
-                        World world = null;
+                        World worldToTeleportTo = null;
 
                         String worldName = sign.getLine(1);
 
                         if ( worldName != null )
-                            world = Bukkit.getWorld(worldName);
+                            worldToTeleportTo = Bukkit.getWorld(worldName);
 
-                        if ( world == null )
-                            world = player.getWorld();
+                        if ( worldToTeleportTo == null )
+                            worldToTeleportTo = player.getWorld();
 
-                        final Location spawnLocation = plugin.chooseSpawn(world);
+                        final boolean cfgSaveBedRespawn  = worldConfig.getBoolean(WorldConfigNode.SAVE_SPAWN_AS_BED, worldToTeleportTo);
+
+                        final Location spawnLocation = plugin.chooseSpawn(worldToTeleportTo);
 
                         plugin.sendGround(player, spawnLocation);
 
@@ -195,13 +204,12 @@ public class Listeners implements Listener
 
                         player.setMetadata("lasttimerandomspawned", new FixedMetadataValue(plugin, System.currentTimeMillis()));
 
-                        if (plugin.yamlHandler.worlds.getBoolean(world.getName() + ".keeprandomspawns",false)){
+                        if (cfgSaveBedRespawn){
                             player.setBedSpawnLocation(spawnLocation);
                         }
 
-                        if (plugin.yamlHandler.config.getString("messages.randomspawned") != null){
-                            player.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.yamlHandler.config.getString("messages.randomspawned")));
-                        }
+                        showRdmRespawnMsg(player, globalConfig);
+
 
                     }else{
                         plugin.playerInfo(player, "You don't have the permission to use this Random Spawn Sign!");
@@ -213,7 +221,7 @@ public class Listeners implements Listener
 
     @EventHandler
     public void onPlayerSignPlace(SignChangeEvent event){
-        if (event.getLine(0).equalsIgnoreCase( plugin.yamlHandler.config.getString("rs-sign-text","[RandomSpawn]") ) ){
+        if (event.getLine(0).equalsIgnoreCase( globalConfig.getString(GlobalConfigNode.SIGN_TEXT) ) ){
             Player player = event.getPlayer();
             if (player.hasPermission("RandomSpawn.placesign")){
                 this.plugin.playerInfo(player, "Random Spawn Sign created!");
@@ -240,9 +248,11 @@ public class Listeners implements Listener
 
         if(player.getBedSpawnLocation() != null && to.equals(player.getBedSpawnLocation().getWorld())) return;			// players bed is in this world
 
-        List<String> randomSpawnFlags = plugin.yamlHandler.worlds.getStringList(to.getName() + ".randomspawnon");
+        final boolean cfgRdmSpawnOnTo = worldConfig.getBoolean(WorldConfigNode.RDM_TELEPORT_TO, to);
+        final boolean cfgRdmSpawnOnFrom = worldConfig.getBoolean(WorldConfigNode.RDM_TELEPORT_TO, from);
+        final boolean cfgKeepSpawn = worldConfig.getBoolean(WorldConfigNode.SAVE_SPAWN_AS_BED, to);
 
-        if(randomSpawnFlags.contains("teleport-from-" + from.getName())){
+        if(cfgRdmSpawnOnTo || cfgRdmSpawnOnFrom){
 
             Location spawnLocation = plugin.chooseSpawn(to);
 
@@ -252,13 +262,31 @@ public class Listeners implements Listener
 
             player.setMetadata("lasttimerandomspawned", new FixedMetadataValue(plugin, System.currentTimeMillis()));
 
-            if (plugin.yamlHandler.worlds.getBoolean(to.getName() + ".keeprandomspawns",false)){
+            if (cfgKeepSpawn){
                 player.setBedSpawnLocation(spawnLocation);
             }
 
-            if (plugin.yamlHandler.config.getString("messages.randomspawned") != null){
-                player.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.yamlHandler.config.getString("messages.randomspawned")));
+            showRdmRespawnMsg(player, globalConfig);
+
+        }
+    }
+
+
+    /**
+     * Show one of the available messages, only prints if enabled in config
+     */
+    public static void showRdmRespawnMsg(Player player, GlobalConfig globalConfig)
+    {
+        if (globalConfig.getBoolean(GlobalConfigNode.SHOW_RDM_SPAWN_MSG)){
+            //Choose a random message out of the available messages
+            List<String> availableMsgs = globalConfig.getStringList(GlobalConfigNode.RDM_SPAWN_MSGS);
+            String msg = "";
+            if (availableMsgs.size() > 0)
+            {
+                msg = availableMsgs.get(new Random().nextInt(availableMsgs.size()));
             }
+            if (msg != null &&! msg.isEmpty())
+                player.sendMessage(ChatColor.translateAlternateColorCodes('&', msg));
         }
     }
 }

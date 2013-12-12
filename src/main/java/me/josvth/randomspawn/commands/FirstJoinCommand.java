@@ -2,6 +2,9 @@ package me.josvth.randomspawn.commands;
 
 import java.util.List;
 
+import me.josvth.randomspawn.handlers.WorldConfig;
+import me.josvth.randomspawn.handlers.WorldConfigNode;
+import org.bukkit.World;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
@@ -16,38 +19,38 @@ public class FirstJoinCommand extends AbstractCommand{
 	public boolean onCommand(CommandSender sender, List<String> args){
 
 		Player player = (Player) sender;
-		String worldName = player.getWorld().getName();
-		
-		List<String> randomSpawnFlags = plugin.yamlHandler.worlds.getStringList(worldName + ".randomspawnon");
-		
+		World world = player.getWorld();
+
+        WorldConfig cfg = plugin.getWorldConfig();
+
 		if (args.size() == 0){
-			if (randomSpawnFlags.contains("firstjoin")){
-				randomSpawnFlags.remove("firstjoin");
-				plugin.yamlHandler.worlds.set(worldName + ".randomspawnon", randomSpawnFlags);
+			if (cfg.getBoolean(WorldConfigNode.RDM_FIRSTJOIN, world)){
+				cfg.set(world, WorldConfigNode.RDM_FIRSTJOIN, false);
 				plugin.playerInfo(player, "Random Spawn will not spawn new players.");
-				plugin.yamlHandler.saveWorlds();
+				cfg.save();
+                cfg.reload();
 				return true;
 			}else{
-				randomSpawnFlags.add("firstjoin");
-				plugin.yamlHandler.worlds.set(worldName + ".randomspawnon", randomSpawnFlags);
+                cfg.set(world, WorldConfigNode.RDM_FIRSTJOIN, true);
 				plugin.playerInfo(player, "Random Spawn will random spawn new players.");
-				plugin.yamlHandler.saveWorlds();
+                cfg.save();
+                cfg.reload();
 				return true;
 			}
 		}
 		if (args.size() == 1){
 			if (args.get(0).matches("true")){
-				randomSpawnFlags.remove("firstjoin");
-				plugin.yamlHandler.worlds.set(worldName + ".randomspawnon", randomSpawnFlags);
-				plugin.playerInfo(player, "Random Spawn will not spawn new players.");
-				plugin.yamlHandler.saveWorlds();
+                cfg.set(world, WorldConfigNode.RDM_FIRSTJOIN, false);
+                plugin.playerInfo(player, "Random Spawn will not spawn new players.");
+                cfg.save();
+                cfg.reload();
 				return true;
 			}
 			if (args.get(0).matches("false")){
-				randomSpawnFlags.remove("firstjoin");
-				plugin.yamlHandler.worlds.set(worldName + ".randomspawnon", randomSpawnFlags);
-				plugin.playerInfo(player, "Random Spawn will not spawn new players.");
-				plugin.yamlHandler.saveWorlds();
+                cfg.set(world, WorldConfigNode.RDM_FIRSTJOIN, true);
+                plugin.playerInfo(player, "Random Spawn will random spawn new players.");
+                cfg.save();
+                cfg.reload();
 				return true;
 			}
 		}

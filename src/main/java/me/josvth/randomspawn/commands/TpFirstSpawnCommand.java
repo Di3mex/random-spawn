@@ -4,7 +4,10 @@ import java.util.List;
 
 import me.josvth.randomspawn.RandomSpawn;
 
+import me.josvth.randomspawn.handlers.WorldConfig;
+import me.josvth.randomspawn.handlers.WorldConfigNode;
 import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
@@ -19,15 +22,17 @@ public class TpFirstSpawnCommand extends AbstractCommand{
 		
 		Player player = (Player)sender;
 		String worldname = player.getWorld().getName();
+
+        WorldConfig cfg = plugin.getWorldConfig();
 		
-		if (plugin.yamlHandler.worlds.contains(worldname +".firstspawn")){
+		if (cfg.getBoolean(WorldConfigNode.WORLDSPAWN_OVERRIDE, worldname)){
 			
-			double x = plugin.yamlHandler.worlds.getDouble(worldname+".firstspawn.x");
-			double y = plugin.yamlHandler.worlds.getDouble(worldname+".firstspawn.y");
-			double z = plugin.yamlHandler.worlds.getDouble(worldname+".firstspawn.z");
+			double x = cfg.getDouble(WorldConfigNode.WORLDSPAWN_X, worldname); //plugin.yamlHandler.worlds.getDouble(worldname+".firstspawn.x");
+			double y = cfg.getDouble(WorldConfigNode.WORLDSPAWN_Y, worldname); //plugin.yamlHandler.worlds.getDouble(worldname+".firstspawn.y");
+			double z = cfg.getDouble(WorldConfigNode.WORLDSPAWN_Z, worldname); //plugin.yamlHandler.worlds.getDouble(worldname+".firstspawn.z");
 			
-			double dyaw = plugin.yamlHandler.worlds.getDouble(worldname+".firstspawn.yaw");
-			double dpitch = plugin.yamlHandler.worlds.getDouble(worldname+".firstspawn.pitch");
+			double dyaw = cfg.getDouble(WorldConfigNode.WORLDSPAWN_YAW, worldname); //plugin.yamlHandler.worlds.getDouble(worldname+".firstspawn.yaw");
+			double dpitch = cfg.getDouble(WorldConfigNode.WORLDSPAWN_PITCH, worldname); //plugin.yamlHandler.worlds.getDouble(worldname+".firstspawn.pitch");
 			
 			float yaw = (float)dyaw;
 			float pitch = (float)dpitch;
