@@ -3,6 +3,7 @@ package me.josvth.randomspawn.handlers;
 
 import org.bukkit.Material;
 
+import java.util.Collection;
 import java.util.regex.Pattern;
 
 /**
@@ -60,5 +61,29 @@ public class MaterialParser
         }
 
         return blockId;
+    }
+
+
+    /**
+     * Convert material ids to their string representation. Keep item ids that haven't been recognized as numerical item ids.
+     *
+     * @param itemIds collection of item ids
+     *
+     * @return the converted strings
+     */
+    public static String[] toMaterials(Collection <Integer> itemIds)
+    {
+        String[] materials = new String[itemIds.size()];
+        int i = 0; //Collection doesn't have get()
+        for (Integer itemId : itemIds)
+        {
+            Material matched = Material.getMaterial(itemId);
+            if (matched != null)
+                materials[i] = matched.name();
+            else
+                materials[i] = Integer.toString(itemId);
+            i++;
+        }
+        return materials;
     }
 }

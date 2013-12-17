@@ -30,6 +30,8 @@ public class GlobalConfig extends ModularConfig
     @Override
     public void load()
     {
+        OPTIONS.clear();
+        config = YamlConfiguration.loadConfiguration(configFile);
         loadDefaults(config);
         loadSettings(config);
     }
@@ -40,6 +42,9 @@ public class GlobalConfig extends ModularConfig
     {
         try
         {
+            config = new YamlConfiguration();
+            for (ConfigNode node : GlobalConfigNode.values())
+                config.set(node.getPath(), OPTIONS.get(key, node));
             config.save(configFile);
         } catch (IOException e)
         {
@@ -59,7 +64,7 @@ public class GlobalConfig extends ModularConfig
     @Override
     public void loadDefaults(ConfigurationSection config)
     {
-        for(ConfigNode node : WorldConfigNode.values()) {
+        for(ConfigNode node : GlobalConfigNode.values()) {
             if(!config.contains(node.getPath())) {
                 config.set(node.getPath(), node.getDefaultValue());
             }
@@ -70,7 +75,7 @@ public class GlobalConfig extends ModularConfig
     @Override
     public void loadSettings(ConfigurationSection config)
     {
-        for(final WorldConfigNode node : WorldConfigNode.values()) {
+        for(final ConfigNode node : GlobalConfigNode.values()) {
             updateOption(key, node, config);
         }
     }

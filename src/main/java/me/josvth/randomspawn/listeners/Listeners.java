@@ -136,7 +136,6 @@ public class Listeners implements Listener{
         }
 
         World world = event.getRespawnLocation().getWorld();
-        String worldName = world.getName();
 
         final boolean cfgRdmRespawn = worldConfig.getBoolean(WorldConfigNode.RDM_RESPAWN, world);
         final boolean cfgRdmBedRespawn = worldConfig.getBoolean(WorldConfigNode.RDM_BEDRESPAWN, world);

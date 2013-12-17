@@ -15,7 +15,8 @@ public class ReloadCommand extends AbstractCommand {
 	public boolean onCommand(CommandSender sender, List<String> args){
 
 		if (args.size() == 0) {
-			//plugin.yamlHandler.loadYamls();
+            plugin.getGlobalConfig().reload();
+            plugin.getWorldConfig().reload();
 			sender.sendMessage( "Random Spawn configurations reloaded!" );
 			return true;
 		}

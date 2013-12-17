@@ -10,10 +10,7 @@ import org.bukkit.plugin.Plugin;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Multiworld implementation of {@link me.josvth.randomspawn.handlers.ModularConfig},
@@ -36,6 +33,8 @@ public class WorldConfig extends ModularConfig
     @Override
     public void load()
     {
+        OPTIONS.clear();
+        config = YamlConfiguration.loadConfiguration(configFile);
         loadDefaults(config);
         loadSettings(config);
     }
@@ -46,6 +45,19 @@ public class WorldConfig extends ModularConfig
     {
         try
         {
+            config = new YamlConfiguration();
+            for (WorldConfigNode node : WorldConfigNode.values())
+                for (Map.Entry<String, Object> worldSettings : OPTIONS.column(node).entrySet())
+                {
+                    switch (node.getVarType())
+                    {
+                        case MATERIAL_LIST:
+                            config.set(worldSettings.getKey() +  node.getPath(), MaterialParser.toMaterials((List) worldSettings.getValue()));
+                            break;
+                        default:
+                            config.set(worldSettings.getKey() + node.getPath(), worldSettings.getValue());
+                    }
+                }
             config.save(configFile);
         } catch (IOException e)
         {
@@ -65,11 +77,7 @@ public class WorldConfig extends ModularConfig
     {
         Set<String> worlds = new HashSet<String>();
         for (String key : config.getKeys(false))
-        {
-            String [] sections = key.split(".");
-            if (sections.length > 0 && sections[0].length() > 0)
-                worlds.add(sections[0]);
-        }
+            worlds.add(key);
         return worlds.toArray(new String[worlds.size()]);
     }
 
@@ -77,7 +85,10 @@ public class WorldConfig extends ModularConfig
     public void loadDefaults(ConfigurationSection config)
     {
         //Iterate trough all available worlds in the config and afterwards iterate through all the confignodes
-        for(String world : getAvailableWorlds(config))
+        String [] worlds = getAvailableWorlds(config);
+        if (worlds.length == 0)
+            worlds = new String [] {"exampleworld"};
+        for(String world : worlds)
         {
             for(ConfigNode node : WorldConfigNode.values()) {
                 if(!config.contains(world + "." + node.getPath())) {

@@ -9,8 +9,8 @@ import java.util.ArrayList;
 public enum GlobalConfigNode implements ConfigNode
 {
     DEBUG("debug", VarType.BOOLEAN, false),
-    SHOW_RDM_SPAWN_MSG("randomspaned-msg.enable", VarType.BOOLEAN, true),
-    RDM_SPAWN_MSGS("messages.randomspawned", VarType.LIST, new DefaultRdmSpawnMsgs()),
+    SHOW_RDM_SPAWN_MSG("randomspawned-msg-enable", VarType.BOOLEAN, true),
+    RDM_SPAWN_MSGS("randomspawned-msgs", VarType.LIST, new DefaultRdmSpawnMsgs()),
     NO_DMG_TIME("nodamagetime", VarType.INTEGER, 5),
     SIGN_TEXT("rs-sign-text", VarType.STRING, "[RandomSpawn]")
     ;

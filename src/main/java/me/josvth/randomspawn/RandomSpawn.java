@@ -22,6 +22,11 @@ public class RandomSpawn extends JavaPlugin{
 
 	@Override
 	public void onEnable() {
+        //Has to be before listeners because listeners need the configs to setup
+        globalConfig = new GlobalConfig(this);
+        worldConfig = new WorldConfig(this);
+        globalConfig.reload();
+        worldConfig.reload();
 
 		//setup handlers
 		yamlHandler = new YamlHandler(this);
@@ -29,10 +34,6 @@ public class RandomSpawn extends JavaPlugin{
 
 		commandHandler = new CommandHandler(this);
 		logDebug("Commands registered!");
-
-        //Has to be before listeners because listeners need the configs to setup
-        globalConfig = new GlobalConfig(this);
-        worldConfig = new WorldConfig(this);
 
 		//setup listeners
 		getServer().getPluginManager().registerEvents(new Listeners(this), this);
@@ -83,6 +84,25 @@ public class RandomSpawn extends JavaPlugin{
 				
 		return getRandomSpawn(world, blacklist, xmin, xmax, zmin, zmax, thickness, type);
 	}
+
+
+    /**
+     * Choose a random spawn location around a center location
+     *
+     * The following method contains code made by NuclearW
+     * based on his SpawnArea plugin:
+     * http://forums.bukkit.org/threads/tp-spawnarea-v0-1-spawns-targetPlayers-in-a-set-area-randomly-1060.20408/
+     *
+     * @param blacklist list of blockids that are not acceptable for spawning a player
+     * @param center location to center the search radius on
+     * @param radius radius to search around center location
+     *
+     * @return the choosen location
+     */
+    public Location getRandomSpawn(Location center, List<Integer> blacklist, int radius)
+    {
+        return getRandomSpawn(center.getWorld(), blacklist, center.getX() - radius, center.getX() + radius, center.getZ() -radius, center.getZ() + radius, 0, "square");
+    }
 
 
     /**

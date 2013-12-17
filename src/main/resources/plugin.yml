@@ -65,6 +65,10 @@ commands:
     description: Random spawns a player.
     usage: /rs spawn <playername> <world> or /rs spawn
     permission: RandomSpawn.spawncommand
+  rs rdmtp:
+    description: Teleports you to a random location within the given radius (square)
+    usage: /rs rdmtp <radius>
+    permission: RandomSpawn.rdmtp
 permissions:
   RandomSpawn.*:
     description: Gives access to all Random Spawn commands.
@@ -107,3 +111,5 @@ permissions:
   RandomSpawn.spawncommand:
     description: allows you to use the spawn command.
     default: op
+  RandomSpawn.rdmtp:
+    description: allows you to use the rdmtp command.

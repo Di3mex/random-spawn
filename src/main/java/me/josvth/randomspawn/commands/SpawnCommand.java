@@ -25,18 +25,13 @@ public class SpawnCommand extends AbstractCommand {
 	@Override
 	public boolean onCommand(CommandSender sender, List<String> args) {
 		
-		Player target = null;
-		World world = null;
+		Player target = sender instanceof Player ? (Player) sender : null;
+		World world = target != null ? target.getWorld() : null;
 
         WorldConfig cfg = plugin.getWorldConfig();
         GlobalConfig globalCfg = plugin.getGlobalConfig();
 
-		if (args.size() == 0) {
-			target = (Player) sender;
-			world = target.getWorld();
-		}
-		
-		if (args.size() == 2) {
+        if (args.size() == 2 &&! args.contains("-here")) {
 			
 			List<Player> players = plugin.getServer().matchPlayer(args.get(0));
 			
@@ -55,13 +50,31 @@ public class SpawnCommand extends AbstractCommand {
 			}
 			
 		}
-		
-		if (world == null || target == null) return false;
-		
-		Location spawn = plugin.chooseSpawn(world);
-		
-		target.teleport(spawn);
-		
+
+        Location spawn;
+		if (args.size() == 2 && args.get(0).equals("-here"))
+        {
+            spawn = target.getLocation();
+            try
+            {
+                Integer radius = Integer.parseInt(args.get(1));
+                spawn = plugin.getRandomSpawn(spawn, cfg.getIntegerList(WorldConfigNode.BLACKLISTED_BLOCKS, spawn.getWorld()), radius);
+            }
+            catch (NumberFormatException e)
+            {
+                sender.sendMessage("Invalid argument 3, expected a number but got " + args.get(1));
+                return false;
+            }
+        }
+        else
+        {
+            spawn = plugin.chooseSpawn(world);
+        }
+
+        if (world == null || target == null) return false;
+
+        target.teleport(spawn);
+
 		target.setMetadata("lasttimerandomspawned", new FixedMetadataValue(plugin, System.currentTimeMillis()));
 		
 		if (cfg.getBoolean(WorldConfigNode.SAVE_SPAWN_AS_BED, world))

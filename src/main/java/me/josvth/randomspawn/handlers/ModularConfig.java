@@ -44,7 +44,7 @@ public abstract class ModularConfig
             {
                 try
                 {
-                    i = (Integer) OPTIONS.get(node, worldName);
+                    i = (Integer) OPTIONS.get(worldName, node);
                 } catch (NullPointerException npe)
                 {
                     if (enabledFor(worldName))
@@ -85,7 +85,7 @@ public abstract class ModularConfig
             {
                 try
                 {
-                    out = (String) OPTIONS.get(node, worldName);
+                    out = (String) OPTIONS.get(worldName, node);
                 } catch (NullPointerException npe)
                 {
                     if (enabledFor(worldName))
@@ -128,7 +128,7 @@ public abstract class ModularConfig
             {
                 try
                 {
-                    list = (List) OPTIONS.get(node, worldName);
+                    list = (List) OPTIONS.get(worldName, node);
                 } catch (NullPointerException npe)
                 {
                     if (enabledFor(worldName))
@@ -169,7 +169,7 @@ public abstract class ModularConfig
             {
                 try
                 {
-                    d = (Double) OPTIONS.get(node, worldName);
+                    d = (Double) OPTIONS.get(worldName, node);
                 } catch (NullPointerException npe)
                 {
                     if (enabledFor(worldName))
@@ -210,7 +210,7 @@ public abstract class ModularConfig
             {
                 try
                 {
-                    bool = (Boolean) OPTIONS.get(node, worldName);
+                    bool = (Boolean) OPTIONS.get(worldName, node);
                 } catch (NullPointerException npe)
                 {
                     if (enabledFor(worldName))
@@ -253,7 +253,7 @@ public abstract class ModularConfig
             {
                 try
                 {
-                    list = (List<Integer>) OPTIONS.get(node, worldName);
+                    list = (List<Integer>) OPTIONS.get(worldName, node);
                 } catch (NullPointerException npe)
                 {
                     if (enabledFor(worldName))
@@ -284,7 +284,7 @@ public abstract class ModularConfig
         {
             case LIST:
             {
-                List<String> list = config.getStringList(node.getPath());
+                List<String> list = config.getStringList(world + node.getPath());
                 if (list == null)
                 {
                     list = (List<String>) node.getDefaultValue();
@@ -294,7 +294,7 @@ public abstract class ModularConfig
             }
             case MATERIAL_LIST:
             {
-                List<String> list = config.getStringList(node.getPath());
+                List<String> list = config.getStringList(world + node.getPath());
                 List<Integer> materials = new ArrayList<Integer>();
                 if (list != null && list.size() > 0)
                     for (String material : list)
@@ -304,30 +304,31 @@ public abstract class ModularConfig
                             materials.add(id);
                     }
                 OPTIONS.put(world, node, materials);
+                break;
             }
             case DOUBLE:
             {
-                OPTIONS.put(world, node, config.getDouble(node.getPath(), (Double) node.getDefaultValue()));
+                OPTIONS.put(world, node, config.getDouble(world + node.getPath(), (Double) node.getDefaultValue()));
                 break;
             }
             case STRING:
             {
-                OPTIONS.put(world, node, config.getString(node.getPath(), (String) node.getDefaultValue()));
+                OPTIONS.put(world, node, config.getString(world + node.getPath(), (String) node.getDefaultValue()));
                 break;
             }
             case INTEGER:
             {
-                OPTIONS.put(world, node, config.getInt(node.getPath(), (Integer) node.getDefaultValue()));
+                OPTIONS.put(world, node, config.getInt(world + node.getPath(), (Integer) node.getDefaultValue()));
                 break;
             }
             case BOOLEAN:
             {
-                OPTIONS.put(world, node, config.getBoolean(node.getPath(), (Boolean) node.getDefaultValue()));
+                OPTIONS.put(world, node, config.getBoolean(world + node.getPath(), (Boolean) node.getDefaultValue()));
                 break;
             }
             default:
             {
-                OPTIONS.put(world, node, config.get(node.getPath(), node.getDefaultValue()));
+                OPTIONS.put(world, node, config.get(world + node.getPath(), node.getDefaultValue()));
             }
         }
     }
