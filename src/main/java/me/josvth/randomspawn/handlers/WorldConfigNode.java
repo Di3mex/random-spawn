@@ -18,7 +18,9 @@ public enum WorldConfigNode implements ConfigNode{
 
 
     SAVE_SPAWN_AS_BED("save-random-spawn-as-bedrespawn", VarType.BOOLEAN, false),
-    SAVE_SPAWN_AS_WORLD("save-random-spawn-as-worldspawn(per player)", VarType.BOOLEAN, true),
+    SAVE_SPAWN_AS_WORLD("save-random-spawn-per-player", VarType.BOOLEAN, true),
+
+    SPAWN_PRIORITY("try-following-spawn-methods-in-given-order", VarType.LIST, new DefaultSpawnOrderList()),
 
     RDM_SEARCHTYPE("spawnarea.type", VarType.STRING, "square"),
     RDM_X_MIN("spawnarea.x-min", VarType.DOUBLE, -100.0D),
@@ -27,10 +29,10 @@ public enum WorldConfigNode implements ConfigNode{
     RDM_Z_MAX("spawnarea.z-max", VarType.DOUBLE, 100.0D),
     RDM_THICKNESS("spawnarea.thickness", VarType.INTEGER, 0),
 
-    RESPAWN_X_MIN("radius-around-saved-respawn-location.x-min", VarType.DOUBLE, 0.0D),
-    RESPAWN_X_MAX("radius-around-saved-respawn-location.x-max", VarType.DOUBLE, 0.0D),
-    RESPAWN_Z_MIN("radius-around-saved-respawn-location.z-min", VarType.DOUBLE, 0.0D),
-    RESPAWN_Z_MAX("radius-around-saved-respawn-location.z-max", VarType.DOUBLE, 0.0D),
+    RESPAWN_RADIUS("saved-random-spawn.radius-around-saved-location-to-spawn", VarType.INTEGER, 0),
+
+    BED_OBSTRUCTED_RANDOM("obstructed-bed.spawn-randomly-around-bed", VarType.BOOLEAN, false),
+    BED_OBSTRUCTED_RADIUS("obstructed-bed.radius", VarType.DOUBLE, 0.0D),
 
     WORLDSPAWN_OVERRIDE("fixed-first-spawn.enable", VarType.BOOLEAN, false),
     WORLDSPAWN_X("fixed-first-spawn.x", VarType.DOUBLE, 0.0D),
@@ -112,6 +114,18 @@ public enum WorldConfigNode implements ConfigNode{
             add(Material.LEAVES.toString());
             add(Material.FIRE.toString());
             add(Material.CACTUS.toString());
+        }
+    }
+
+    private static class DefaultSpawnOrderList extends ArrayList<String>{
+        public DefaultSpawnOrderList()
+        {
+            super();
+            add("bed-random");
+            add("bed-normal");
+            add("bed-obstructed");
+            add("saved-random-spawn");
+            add("new-random-spawn");
         }
     }
 }

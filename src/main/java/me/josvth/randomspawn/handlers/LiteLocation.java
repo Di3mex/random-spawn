@@ -23,10 +23,11 @@ public class LiteLocation
     }
 
 
-    public String toString(String playerName)
+    @Override
+    public String toString()
     {
         //Expected Output "x,z" f.e. "Diemex@25,25"
-        return playerName + "@" + x + "," + "z";
+        return x + "," + z;
     }
 
 
@@ -42,27 +43,21 @@ public class LiteLocation
         LiteLocation loc = new LiteLocation();
         if (input != null)
         {
-            String[] firstCut = input.split("@");
-            if (firstCut.length > 1)
+            String[] cut = input.split(",");
+            if (cut.length > 1)
             {
-                loc.playerName = firstCut[0];
-                String[] secondCut = firstCut[1].split(",");
-                if (secondCut.length > 1)
-                {
-                    //Remove everything besides digits from the string
-                    Pattern keepDigits = Pattern.compile("[^0-9]");
-                    secondCut[0] = keepDigits.matcher(secondCut[0]).replaceAll("");
-                    secondCut[1] = keepDigits.matcher(secondCut[1]).replaceAll("");
+                //Remove everything besides digits from the string
+                Pattern keepDigits = Pattern.compile("[^0-9]");
+                cut[0] = keepDigits.matcher(cut[0]).replaceAll("");
+                cut[1] = keepDigits.matcher(cut[1]).replaceAll("");
 
-                    if (secondCut[0].length() > 0 && secondCut[1].length() > 0)
-                    {
-                        loc.x = Integer.parseInt(secondCut[0]);
-                        loc.z = Integer.parseInt(secondCut[1]);
-                        //Only now the parsing was successful = the input was valid
-                        return loc;
-                    }
+                if (cut[0].length() > 0 && cut[1].length() > 0)
+                {
+                    loc.x = Integer.parseInt(cut[0]);
+                    loc.z = Integer.parseInt(cut[1]);
+                    //Only now the parsing was successful = the input was valid
+                    return loc;
                 }
-                return null;
             }
         }
         return null;

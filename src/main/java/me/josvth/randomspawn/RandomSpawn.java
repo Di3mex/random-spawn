@@ -15,7 +15,7 @@ import java.util.List;
 
 public class RandomSpawn extends JavaPlugin{
 
-	public YamlHandler yamlHandler;
+	private SavedLocationHandler spawnPersistence;
 	CommandHandler commandHandler;
     private GlobalConfig globalConfig;
     private WorldConfig worldConfig;
@@ -29,7 +29,7 @@ public class RandomSpawn extends JavaPlugin{
         worldConfig.reload();
 
 		//setup handlers
-		yamlHandler = new YamlHandler(this);
+		spawnPersistence = new SavedLocationHandler(this);
 		logDebug("Yamls loaded!");
 
 		commandHandler = new CommandHandler(this);
@@ -47,6 +47,11 @@ public class RandomSpawn extends JavaPlugin{
     public WorldConfig getWorldConfig()
     {
         return worldConfig;
+    }
+
+    public SavedLocationHandler getSavedLocationHandler()
+    {
+        return spawnPersistence;
     }
 
 	public void logInfo(String message){
@@ -72,15 +77,15 @@ public class RandomSpawn extends JavaPlugin{
 
 		List<Integer> blacklist = worldConfig.getIntegerList(WorldConfigNode.BLACKLISTED_BLOCKS, worldName);
 
-		double xmin = worldConfig.getDouble(WorldConfigNode.RDM_X_MIN, world); //yamlHandler.worlds.getDouble(worldName +".spawnarea.x-min", -100);
-		double xmax = worldConfig.getDouble(WorldConfigNode.RDM_X_MAX, world); //yamlHandler.worlds.getDouble(worldName +".spawnarea.x-max", 100);
-		double zmin = worldConfig.getDouble(WorldConfigNode.RDM_Z_MIN, world); //yamlHandler.worlds.getDouble(worldName +".spawnarea.z-min", -100);
-		double zmax = worldConfig.getDouble(WorldConfigNode.RDM_Z_MAX, world); //yamlHandler.worlds.getDouble(worldName +".spawnarea.z-max", 100);
+		double xmin = worldConfig.getDouble(WorldConfigNode.RDM_X_MIN, world);
+		double xmax = worldConfig.getDouble(WorldConfigNode.RDM_X_MAX, world);
+		double zmin = worldConfig.getDouble(WorldConfigNode.RDM_Z_MIN, world);
+		double zmax = worldConfig.getDouble(WorldConfigNode.RDM_Z_MAX, world);
 				
 		// Spawn area thickness near border. If 0 spawns whole area
-		int thickness = worldConfig.getInt(WorldConfigNode.RDM_THICKNESS, world); //yamlHandler.worlds.getInt(worldName +".spawnarea.thickness", 0);
+		int thickness = worldConfig.getInt(WorldConfigNode.RDM_THICKNESS, world);
 
-		String type = worldConfig.getString(WorldConfigNode.RDM_SEARCHTYPE, worldName); //yamlHandler.worlds.getString(worldName +".spawnarea.type", "square");
+		String type = worldConfig.getString(WorldConfigNode.RDM_SEARCHTYPE, worldName);
 				
 		return getRandomSpawn(world, blacklist, xmin, xmax, zmin, zmax, thickness, type);
 	}

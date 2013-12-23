@@ -2,14 +2,8 @@ package me.josvth.randomspawn.listeners;
 
 
 import me.josvth.randomspawn.RandomSpawn;
-import me.josvth.randomspawn.handlers.GlobalConfig;
-import me.josvth.randomspawn.handlers.GlobalConfigNode;
-import me.josvth.randomspawn.handlers.WorldConfig;
-import me.josvth.randomspawn.handlers.WorldConfigNode;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.Location;
-import org.bukkit.World;
+import me.josvth.randomspawn.handlers.*;
+import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
 import org.bukkit.entity.Player;
@@ -18,6 +12,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.*;
 import org.bukkit.metadata.FixedMetadataValue;
 
@@ -140,43 +135,126 @@ public class Listeners implements Listener{
         final boolean cfgRdmRespawn = worldConfig.getBoolean(WorldConfigNode.RDM_RESPAWN, world);
         final boolean cfgRdmBedRespawn = worldConfig.getBoolean(WorldConfigNode.RDM_BEDRESPAWN, world);
         final boolean cfgSaveBedRespawn  = worldConfig.getBoolean(WorldConfigNode.SAVE_SPAWN_AS_BED, world);
+        final boolean cfgSaveWorldRespawn = worldConfig.getBoolean(WorldConfigNode.SAVE_SPAWN_AS_WORLD, world);
 
-        if (event.isBedSpawn() && !cfgRdmBedRespawn){  		// checks if player should be spawned at his bed
-            plugin.logDebug(playerName + " is spawned at his bed!");
-            return;
-        }
+        final boolean bedObstructed = player.getBedSpawnLocation() == null;
+        final Location bedRespawn = player.getBedSpawnLocation() != null ? player.getBedSpawnLocation() : getBedLocation(player);
 
-        if (cfgSaveBedRespawn && player.getBedSpawnLocation() != null ){
-            event.setRespawnLocation(player.getBedSpawnLocation());
-            plugin.logDebug(playerName + " is spawned at his saved spawn.");
-            return;
-        }
+        Location location = null;
 
-        if (cfgRdmRespawn){
+        for (String order : worldConfig.getStringList(WorldConfigNode.SPAWN_PRIORITY, world))
+        {
+            switch (order)
+            {
+                case "bed-random":
+                {
+                    //Randomize BedRespawns
+                    if (cfgRdmBedRespawn && event.isBedSpawn()){
+                        location = plugin.chooseSpawn(world);
+                        event.setRespawnLocation(location);
 
-            Location spawnLocation = plugin.chooseSpawn(world);
+                        plugin.sendGround(player, event.getRespawnLocation());
 
-            //player.sendMessage("You should be random spawned at: " + spawnLocation.getX() + "," + spawnLocation.getY() + "," + spawnLocation.getZ());
+                        player.setMetadata("lasttimerandomspawned", new FixedMetadataValue(plugin, System.currentTimeMillis()));
 
-            plugin.sendGround(player, spawnLocation);
+                        if (cfgSaveBedRespawn && player.getBedSpawnLocation() == null)
+                            player.setBedSpawnLocation(location);
+                        if (cfgSaveWorldRespawn && plugin.getSavedLocationHandler().getSpawnLocation(player, world) == null)
+                            plugin.getSavedLocationHandler().addSpawnLocation(player, location);
 
-            event.setRespawnLocation(spawnLocation);
+                        showRdmRespawnMsg(player, globalConfig);
+                        return;
+                    }
+                    break;
+                }
 
-            player.setMetadata("lasttimerandomspawned", new FixedMetadataValue(plugin, System.currentTimeMillis()));
+                case "bed-normal":
+                {
+                    if (event.isBedSpawn() && !cfgRdmBedRespawn){  		// checks if player should be spawned at his bed
+                        plugin.logDebug(playerName + " is spawned at his bed!");
+                        return;
+                    }
+                    break;
+                }
 
-            if (cfgSaveBedRespawn){
-                player.setBedSpawnLocation(spawnLocation);
+                case "bed-obstructed":
+                {
+                    if (bedObstructed && worldConfig.getBoolean(WorldConfigNode.BED_OBSTRUCTED_RANDOM, world)&& bedRespawn != null)
+                    {
+                        location = bedRespawn;
+
+                        event.setRespawnLocation(plugin.getRandomSpawn(location,
+                                worldConfig.getIntegerList(WorldConfigNode.BLACKLISTED_BLOCKS, world),
+                                worldConfig.getInt(WorldConfigNode.RESPAWN_RADIUS, world)));
+
+                        if (cfgSaveBedRespawn && player.getBedSpawnLocation() == null)
+                            player.setBedSpawnLocation(location);
+                        if (cfgSaveWorldRespawn && plugin.getSavedLocationHandler().getSpawnLocation(player, world) == null)
+                            plugin.getSavedLocationHandler().addSpawnLocation(player, location);
+
+                        plugin.logDebug(playerName + " is spawned in a radius around his saved random spawn.");
+                        return;
+                    }
+                    break;
+                }
+
+                case "saved-random-spawn":
+                {
+                    //Spawn players around a saved spawn location
+                    if (cfgSaveWorldRespawn && plugin.getSavedLocationHandler().getSpawnLocation(player, world) != null)
+                    {
+                        location = plugin.getSavedLocationHandler().getSpawnLocation(player, world);
+
+                        event.setRespawnLocation(plugin.getRandomSpawn(location,
+                                worldConfig.getIntegerList(WorldConfigNode.BLACKLISTED_BLOCKS, world),
+                                worldConfig.getInt(WorldConfigNode.RESPAWN_RADIUS, world)));
+
+                        if (cfgSaveBedRespawn && player.getBedSpawnLocation() == null)
+                            player.setBedSpawnLocation(location);
+
+                        plugin.logDebug(playerName + " is spawned in a radius around his saved random spawn.");
+                        return;
+                    }
+                    break;
+                }
+
+                case "new-random-spawn":
+                {
+                    //Regular random spawn logic
+                    if (cfgRdmRespawn){
+
+                        location = plugin.chooseSpawn(world);
+                        event.setRespawnLocation(location);
+
+                        plugin.sendGround(player, event.getRespawnLocation());
+
+                        player.setMetadata("lasttimerandomspawned", new FixedMetadataValue(plugin, System.currentTimeMillis()));
+
+                        if (cfgSaveBedRespawn && player.getBedSpawnLocation() == null)
+                            player.setBedSpawnLocation(location);
+                        if (cfgSaveWorldRespawn && plugin.getSavedLocationHandler().getSpawnLocation(player, world) == null)
+                            plugin.getSavedLocationHandler().addSpawnLocation(player, location);
+
+                        showRdmRespawnMsg(player, globalConfig);
+                        return;
+                    }
+                    break;
+                }
             }
-
-            showRdmRespawnMsg(player, globalConfig);
         }
+    }
+
+    @EventHandler
+    public void onPlayerDeath (PlayerDeathEvent event)
+    {
+        saveBedSpawn(event.getEntity(), event.getEntity().getBedSpawnLocation());
     }
 
     @EventHandler
     public void onPlayerSignInteract(PlayerInteractEvent event){
         if(event.getAction() == Action.RIGHT_CLICK_BLOCK){
             Block block = event.getClickedBlock();
-            if (block.getTypeId() == 68 || block.getTypeId() == 63){
+            if (block.getType() == Material.SIGN_POST || block.getType() == Material.WALL_SIGN){
                 Sign sign = (Sign)block.getState();
                 final Player player = event.getPlayer();
                 if (sign.getLine(0).equalsIgnoreCase(globalConfig.getString(GlobalConfigNode.SIGN_TEXT) ) ){
@@ -287,5 +365,21 @@ public class Listeners implements Listener{
             if (msg != null &&! msg.isEmpty())
                 player.sendMessage(ChatColor.translateAlternateColorCodes('&', msg));
         }
+    }
+
+    //Temporary saving of old bedrespawns in case the bed got missing or was obstructed
+
+    private String playerName;
+    private Location bedLocation;
+
+    public void saveBedSpawn(Player player, Location loc)
+    {
+        playerName = player.getName();
+        bedLocation = loc;
+    }
+
+    public Location getBedLocation (Player player)
+    {
+        return playerName.equals(player.getName()) ? bedLocation : null;
     }
 }

@@ -41,10 +41,10 @@ public class SetAreaCommand extends AbstractCommand{
 
 			String worldname = reference.getWorld().getName();
 
-            cfg.set(worldname, WorldConfigNode.RESPAWN_X_MIN, xmin);
-            cfg.set(worldname, WorldConfigNode.RESPAWN_X_MIN, xmax);
-            cfg.set(worldname, WorldConfigNode.RESPAWN_X_MIN, zmin);
-            cfg.set(worldname, WorldConfigNode.RESPAWN_X_MIN, zmax);
+            cfg.set(worldname, WorldConfigNode.RDM_X_MIN, xmin);
+            cfg.set(worldname, WorldConfigNode.RDM_X_MAX, xmax);
+            cfg.set(worldname, WorldConfigNode.RDM_Z_MIN, zmin);
+            cfg.set(worldname, WorldConfigNode.RDM_Z_MAX, zmax);
             cfg.set(worldname, WorldConfigNode.RDM_RESPAWN, true);
 
             cfg.save();
@@ -73,10 +73,10 @@ public class SetAreaCommand extends AbstractCommand{
 
 			String worldname = reference.getWorld().getName();
 
-            cfg.set(worldname, WorldConfigNode.RESPAWN_X_MIN, xmin);
-            cfg.set(worldname, WorldConfigNode.RESPAWN_X_MIN, xmax);
-            cfg.set(worldname, WorldConfigNode.RESPAWN_X_MIN, zmin);
-            cfg.set(worldname, WorldConfigNode.RESPAWN_X_MIN, zmax);
+            cfg.set(worldname, WorldConfigNode.RDM_X_MIN, xmin);
+            cfg.set(worldname, WorldConfigNode.RDM_X_MAX, xmax);
+            cfg.set(worldname, WorldConfigNode.RDM_Z_MIN, zmin);
+            cfg.set(worldname, WorldConfigNode.RDM_Z_MAX, zmax);
             cfg.set(worldname, WorldConfigNode.RDM_RESPAWN, true);
 
 			if (args.get(0).matches("circle")) {
@@ -110,10 +110,10 @@ public class SetAreaCommand extends AbstractCommand{
 
 			String worldname = reference.getWorld().getName();
 
-            cfg.set(worldname, WorldConfigNode.RESPAWN_X_MIN, xmin);
-            cfg.set(worldname, WorldConfigNode.RESPAWN_X_MIN, xmax);
-            cfg.set(worldname, WorldConfigNode.RESPAWN_X_MIN, zmin);
-            cfg.set(worldname, WorldConfigNode.RESPAWN_X_MIN, zmax);
+            cfg.set(worldname, WorldConfigNode.RDM_X_MIN, xmin);
+            cfg.set(worldname, WorldConfigNode.RDM_X_MAX, xmax);
+            cfg.set(worldname, WorldConfigNode.RDM_Z_MIN, zmin);
+            cfg.set(worldname, WorldConfigNode.RDM_Z_MAX, zmax);
             cfg.set(worldname, WorldConfigNode.RDM_RESPAWN, true);
 			
 			cfg.save();
@@ -141,10 +141,10 @@ public class SetAreaCommand extends AbstractCommand{
 
 			String worldname = reference.getWorld().getName();
 
-            cfg.set(worldname, WorldConfigNode.RESPAWN_X_MIN, xmin);
-            cfg.set(worldname, WorldConfigNode.RESPAWN_X_MIN, xmax);
-            cfg.set(worldname, WorldConfigNode.RESPAWN_X_MIN, zmin);
-            cfg.set(worldname, WorldConfigNode.RESPAWN_X_MIN, zmax);
+            cfg.set(worldname, WorldConfigNode.RDM_X_MIN, xmin);
+            cfg.set(worldname, WorldConfigNode.RDM_X_MAX, xmax);
+            cfg.set(worldname, WorldConfigNode.RDM_Z_MIN, zmin);
+            cfg.set(worldname, WorldConfigNode.RDM_Z_MAX, zmax);
             cfg.set(worldname, WorldConfigNode.RDM_RESPAWN, true);
 
             cfg.save();
