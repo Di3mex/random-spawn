@@ -185,7 +185,7 @@ public class Listeners implements Listener{
 
                         event.setRespawnLocation(plugin.getRandomSpawn(location,
                                 worldConfig.getIntegerList(WorldConfigNode.BLACKLISTED_BLOCKS, world),
-                                worldConfig.getInt(WorldConfigNode.RESPAWN_RADIUS, world)));
+                                worldConfig.getInt(WorldConfigNode.BED_OBSTRUCTED_RADIUS, world)));
 
                         if (cfgSaveBedRespawn && player.getBedSpawnLocation() == null)
                             player.setBedSpawnLocation(location);

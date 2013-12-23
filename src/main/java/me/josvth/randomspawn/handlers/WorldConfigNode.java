@@ -29,10 +29,10 @@ public enum WorldConfigNode implements ConfigNode{
     RDM_Z_MAX("spawnarea.z-max", VarType.DOUBLE, 100.0D),
     RDM_THICKNESS("spawnarea.thickness", VarType.INTEGER, 0),
 
-    RESPAWN_RADIUS("saved-random-spawn.radius-around-saved-location-to-spawn", VarType.INTEGER, 0),
+    RESPAWN_RADIUS("saved-random-spawn.spawn-in-radius-around-saved-location", VarType.INTEGER, 0),
 
     BED_OBSTRUCTED_RANDOM("obstructed-bed.spawn-randomly-around-bed", VarType.BOOLEAN, false),
-    BED_OBSTRUCTED_RADIUS("obstructed-bed.radius", VarType.DOUBLE, 0.0D),
+    BED_OBSTRUCTED_RADIUS("obstructed-bed.spawn-in-radius-around-obstructed-bed", VarType.DOUBLE, 0.0D),
 
     WORLDSPAWN_OVERRIDE("fixed-first-spawn.enable", VarType.BOOLEAN, false),
     WORLDSPAWN_X("fixed-first-spawn.x", VarType.DOUBLE, 0.0D),
