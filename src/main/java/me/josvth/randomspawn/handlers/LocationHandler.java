@@ -18,17 +18,18 @@ import java.io.IOException;
  */
 public class LocationHandler
 {
-    RandomSpawn plugin;
-
-    File configFile;
-
+    private RandomSpawn plugin;
+    private File configFile;
     //WorldName, PlayerName, Location(x,z)
-    Table<String, String, LiteLocation> locations = HashBasedTable.create();
+    private Table<String, String, LiteLocation> locations = HashBasedTable.create();
+    private FileConfiguration fileConfiguration;
+    //If set to true will only save x and z and return the highest block at the column
+    private boolean saveYCoord;
 
-    public FileConfiguration fileConfiguration;
 
-    public LocationHandler(RandomSpawn instance, File configFile) {
+    public LocationHandler(RandomSpawn instance, File configFile, boolean saveYCoord) {
         plugin = instance;
+        this.saveYCoord = saveYCoord;
         this.configFile = configFile;
         if (!(this.configFile.exists())){try{
             this.configFile.createNewFile();} catch (IOException e){e.printStackTrace();}}
@@ -78,14 +79,19 @@ public class LocationHandler
 
     public void addLocation(Player player, Location loc)
     {
-        locations.put(loc.getWorld().getName(), player.getName(), new LiteLocation(loc.getBlockX(), loc.getBlockZ()));
+        LiteLocation liteLoc = new LiteLocation(loc.getBlockX(), loc.getBlockZ());
+        if (saveYCoord)
+            liteLoc.y = loc.getBlockY();
+        locations.put(loc.getWorld().getName(), player.getName(), liteLoc);
         saveLocations();
     }
 
 
     public Location getLocation(Player player, World world)
     {
-        LiteLocation previous = locations.get(world.getName(), player.getName());
-        return previous != null ? new Location(world, previous.x, world.getHighestBlockYAt(previous.x, previous.z), previous.z) : null;
+        LiteLocation liteLoc = locations.get(world.getName(), player.getName());
+        if (liteLoc != null && liteLoc.y == null) //a player can have no location set
+            liteLoc.y = world.getHighestBlockYAt(liteLoc.x, liteLoc.z);
+        return liteLoc != null ? new Location(world, liteLoc.x, liteLoc.y, liteLoc.z) : null;
     }
 }

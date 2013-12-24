@@ -31,8 +31,8 @@ public class RandomSpawn extends JavaPlugin{
         worldConfig.reload();
 
 		//setup handlers
-		spawnPersistence = new LocationHandler(this, new File(getDataFolder(), "spawnLocations.yml"));
-        bedPersistence = new LocationHandler(this, new File(getDataFolder(), "bedLocations.yml"));
+		spawnPersistence = new LocationHandler(this, new File(getDataFolder(), "spawnLocations.yml"), false);
+        bedPersistence = new LocationHandler(this, new File(getDataFolder(), "bedLocations.yml"), true);
 		logDebug("Yamls loaded!");
 
 		commandHandler = new CommandHandler(this);

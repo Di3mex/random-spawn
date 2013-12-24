@@ -1,6 +1,8 @@
 package me.josvth.randomspawn.handlers;
 
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.Pattern;
 
 /**
@@ -8,17 +10,27 @@ import java.util.regex.Pattern;
  */
 public class LiteLocation
 {
+    //Remove everything besides digits from the string
+    private static Pattern keepDigits = Pattern.compile("[^0-9]");
+
     int x;
+    Integer y; //so we have a null value and know if it is set or not
     int z;
     String playerName;
-
 
     LiteLocation(){}
 
 
-    LiteLocation(int x, int z)
+    public LiteLocation(int x, int z)
     {
         this.x = x;
+        this.z = z;
+    }
+
+    public LiteLocation(int x, int y, int z)
+    {
+        this.x = x;
+        this.y = y;
         this.z = z;
     }
 
@@ -26,8 +38,8 @@ public class LiteLocation
     @Override
     public String toString()
     {
-        //Expected Output "x,z" f.e. "Diemex@25,25"
-        return x + "," + z;
+        //Expected Output "x,z" f.e. "23,25" or "12,13,14" if y coord is set
+        return x + "," + (y != null ? y.toString()+"," : "") + z;
     }
 
 
@@ -40,26 +52,35 @@ public class LiteLocation
      */
     public static LiteLocation fromString(String input)
     {
-        LiteLocation loc = new LiteLocation();
+        LiteLocation loc = null;
         if (input != null)
         {
             String[] cut = input.split(",");
             if (cut.length > 1)
             {
-                //Remove everything besides digits from the string
-                Pattern keepDigits = Pattern.compile("[^0-9]");
-                cut[0] = keepDigits.matcher(cut[0]).replaceAll("");
-                cut[1] = keepDigits.matcher(cut[1]).replaceAll("");
 
-                if (cut[0].length() > 0 && cut[1].length() > 0)
+                List<Integer> parsedNumbers = new ArrayList<Integer>();
+                for (int i = 0; i < cut.length; i++)
                 {
-                    loc.x = Integer.parseInt(cut[0]);
-                    loc.z = Integer.parseInt(cut[1]);
-                    //Only now the parsing was successful = the input was valid
-                    return loc;
+                    cut[i] = keepDigits.matcher(cut[i]).replaceAll("");
+                    if (cut[i].length() > 0)
+                        parsedNumbers.add(Integer.parseInt(cut[i]));
+                }
+
+                if (parsedNumbers.size() == 2)
+                {
+                    loc = new LiteLocation();
+                    loc.x = parsedNumbers.get(0);
+                    loc.z = parsedNumbers.get(1);
+                } else if (parsedNumbers.size() > 2)
+                {
+                    loc = new LiteLocation();
+                    loc.x = parsedNumbers.get(0);
+                    loc.y = parsedNumbers.get(1);
+                    loc.z = parsedNumbers.get(2);
                 }
             }
         }
-        return null;
+        return loc;
     }
 }
