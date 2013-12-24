@@ -12,7 +12,6 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
-import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.*;
 import org.bukkit.metadata.FixedMetadataValue;
 
@@ -71,6 +70,10 @@ public class Listeners implements Listener{
 
         if(world.getEnvironment().equals(World.Environment.NETHER) || world.getEnvironment().equals(World.Environment.THE_END)) return;
 
+        //Check if a player has a saved bed spawn and save it if
+        if (player.getBedSpawnLocation() != null && plugin.getBedLocationHandler().getLocation(player, player.getWorld()) == null)
+            plugin.getBedLocationHandler().addLocation(player, player.getBedSpawnLocation());
+
         if(player.hasPlayedBefore()) return;
 
         final boolean cfgRdmFirstJoin = worldConfig.getBoolean(WorldConfigNode.RDM_RESPAWN, world);
@@ -100,6 +103,13 @@ public class Listeners implements Listener{
         }
 
         showRdmRespawnMsg(player, globalConfig);
+    }
+
+
+    @EventHandler
+    public void onPlayerSleep (PlayerBedEnterEvent event)
+    {
+        plugin.getBedLocationHandler().addLocation(event.getPlayer(), event.getBed().getLocation());
     }
 
 
@@ -137,8 +147,9 @@ public class Listeners implements Listener{
         final boolean cfgSaveBedRespawn  = worldConfig.getBoolean(WorldConfigNode.SAVE_SPAWN_AS_BED, world);
         final boolean cfgSaveWorldRespawn = worldConfig.getBoolean(WorldConfigNode.SAVE_SPAWN_AS_WORLD, world);
 
+        LocationHandler bedlocationHandler = plugin.getBedLocationHandler();
         final boolean bedObstructed = player.getBedSpawnLocation() == null;
-        final Location bedRespawn = player.getBedSpawnLocation() != null ? player.getBedSpawnLocation() : getBedLocation(player);
+        final Location bedRespawn = player.getBedSpawnLocation() != null ? player.getBedSpawnLocation() : bedlocationHandler.getLocation(player, player.getWorld());
 
         Location location = null;
 
@@ -149,7 +160,8 @@ public class Listeners implements Listener{
                 case "bed-random":
                 {
                     //Randomize BedRespawns
-                    if (cfgRdmBedRespawn && event.isBedSpawn()){
+                    if (cfgRdmBedRespawn && event.isBedSpawn())
+                    {
                         location = plugin.chooseSpawn(world);
                         event.setRespawnLocation(location);
 
@@ -158,9 +170,12 @@ public class Listeners implements Listener{
                         player.setMetadata("lasttimerandomspawned", new FixedMetadataValue(plugin, System.currentTimeMillis()));
 
                         if (cfgSaveBedRespawn && player.getBedSpawnLocation() == null)
+                        {
                             player.setBedSpawnLocation(location);
-                        if (cfgSaveWorldRespawn && plugin.getSavedLocationHandler().getSpawnLocation(player, world) == null)
-                            plugin.getSavedLocationHandler().addSpawnLocation(player, location);
+                            bedlocationHandler.addLocation(player, location);
+                        }
+                        if (cfgSaveWorldRespawn && plugin.getSpawnLocationHandler().getLocation(player, world) == null)
+                            plugin.getSpawnLocationHandler().addLocation(player, location);
 
                         showRdmRespawnMsg(player, globalConfig);
                         return;
@@ -170,7 +185,7 @@ public class Listeners implements Listener{
 
                 case "bed-normal":
                 {
-                    if (event.isBedSpawn() && !cfgRdmBedRespawn){  		// checks if player should be spawned at his bed
+                    if (event.isBedSpawn() && !cfgRdmBedRespawn &&! bedObstructed){  		// checks if player should be spawned at his bed
                         plugin.logDebug(playerName + " is spawned at his bed!");
                         return;
                     }
@@ -179,18 +194,26 @@ public class Listeners implements Listener{
 
                 case "bed-obstructed":
                 {
-                    if (bedObstructed && worldConfig.getBoolean(WorldConfigNode.BED_OBSTRUCTED_RANDOM, world)&& bedRespawn != null)
+                    if (bedObstructed && worldConfig.getBoolean(WorldConfigNode.BED_OBSTRUCTED_RANDOM, world) && bedRespawn != null)
                     {
                         location = bedRespawn;
+
+                        //bed block has been broken
+                        if (location.getBlock().getType() != Material.BED_BLOCK)
+                        {
+                            bedlocationHandler.removeLocation(player, world);
+                            break;
+                        }
 
                         event.setRespawnLocation(plugin.getRandomSpawn(location,
                                 worldConfig.getIntegerList(WorldConfigNode.BLACKLISTED_BLOCKS, world),
                                 worldConfig.getInt(WorldConfigNode.BED_OBSTRUCTED_RADIUS, world)));
 
+                        //So that when a player respawns it checks if the bed is still obstructed
+                        player.setBedSpawnLocation(location);
+
                         if (cfgSaveBedRespawn && player.getBedSpawnLocation() == null)
-                            player.setBedSpawnLocation(location);
-                        if (cfgSaveWorldRespawn && plugin.getSavedLocationHandler().getSpawnLocation(player, world) == null)
-                            plugin.getSavedLocationHandler().addSpawnLocation(player, location);
+                            bedlocationHandler.addLocation(player, location);
 
                         plugin.logDebug(playerName + " is spawned in a radius around his saved random spawn.");
                         return;
@@ -201,16 +224,19 @@ public class Listeners implements Listener{
                 case "saved-random-spawn":
                 {
                     //Spawn players around a saved spawn location
-                    if (cfgSaveWorldRespawn && plugin.getSavedLocationHandler().getSpawnLocation(player, world) != null)
+                    if (cfgSaveWorldRespawn && plugin.getSpawnLocationHandler().getLocation(player, world) != null)
                     {
-                        location = plugin.getSavedLocationHandler().getSpawnLocation(player, world);
+                        location = plugin.getSpawnLocationHandler().getLocation(player, world);
 
                         event.setRespawnLocation(plugin.getRandomSpawn(location,
                                 worldConfig.getIntegerList(WorldConfigNode.BLACKLISTED_BLOCKS, world),
                                 worldConfig.getInt(WorldConfigNode.RESPAWN_RADIUS, world)));
 
                         if (cfgSaveBedRespawn && player.getBedSpawnLocation() == null)
+                        {
                             player.setBedSpawnLocation(location);
+                            bedlocationHandler.addLocation(player, location);
+                        }
 
                         plugin.logDebug(playerName + " is spawned in a radius around his saved random spawn.");
                         return;
@@ -231,9 +257,12 @@ public class Listeners implements Listener{
                         player.setMetadata("lasttimerandomspawned", new FixedMetadataValue(plugin, System.currentTimeMillis()));
 
                         if (cfgSaveBedRespawn && player.getBedSpawnLocation() == null)
+                        {
                             player.setBedSpawnLocation(location);
-                        if (cfgSaveWorldRespawn && plugin.getSavedLocationHandler().getSpawnLocation(player, world) == null)
-                            plugin.getSavedLocationHandler().addSpawnLocation(player, location);
+                            bedlocationHandler.addLocation(player, location);
+                        }
+                        if (cfgSaveWorldRespawn && plugin.getSpawnLocationHandler().getLocation(player, world) == null)
+                            plugin.getSpawnLocationHandler().addLocation(player, location);
 
                         showRdmRespawnMsg(player, globalConfig);
                         return;
@@ -242,12 +271,6 @@ public class Listeners implements Listener{
                 }
             }
         }
-    }
-
-    @EventHandler
-    public void onPlayerDeath (PlayerDeathEvent event)
-    {
-        saveBedSpawn(event.getEntity(), event.getEntity().getBedSpawnLocation());
     }
 
     @EventHandler
@@ -348,7 +371,6 @@ public class Listeners implements Listener{
         }
     }
 
-
     /**
      * Show one of the available messages, only prints if enabled in config
      */
@@ -365,21 +387,5 @@ public class Listeners implements Listener{
             if (msg != null &&! msg.isEmpty())
                 player.sendMessage(ChatColor.translateAlternateColorCodes('&', msg));
         }
-    }
-
-    //Temporary saving of old bedrespawns in case the bed got missing or was obstructed
-
-    private String playerName;
-    private Location bedLocation;
-
-    public void saveBedSpawn(Player player, Location loc)
-    {
-        playerName = player.getName();
-        bedLocation = loc;
-    }
-
-    public Location getBedLocation (Player player)
-    {
-        return playerName.equals(player.getName()) ? bedLocation : null;
     }
 }

@@ -11,11 +11,13 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.io.File;
 import java.util.List;
 
 public class RandomSpawn extends JavaPlugin{
 
-	private SavedLocationHandler spawnPersistence;
+	private LocationHandler spawnPersistence;
+    private LocationHandler bedPersistence;
 	CommandHandler commandHandler;
     private GlobalConfig globalConfig;
     private WorldConfig worldConfig;
@@ -29,7 +31,8 @@ public class RandomSpawn extends JavaPlugin{
         worldConfig.reload();
 
 		//setup handlers
-		spawnPersistence = new SavedLocationHandler(this);
+		spawnPersistence = new LocationHandler(this, new File(getDataFolder(), "spawnLocations.yml"));
+        bedPersistence = new LocationHandler(this, new File(getDataFolder(), "bedLocations.yml"));
 		logDebug("Yamls loaded!");
 
 		commandHandler = new CommandHandler(this);
@@ -49,9 +52,14 @@ public class RandomSpawn extends JavaPlugin{
         return worldConfig;
     }
 
-    public SavedLocationHandler getSavedLocationHandler()
+    public LocationHandler getSpawnLocationHandler()
     {
         return spawnPersistence;
+    }
+
+    public LocationHandler getBedLocationHandler()
+    {
+        return bedPersistence;
     }
 
 	public void logInfo(String message){

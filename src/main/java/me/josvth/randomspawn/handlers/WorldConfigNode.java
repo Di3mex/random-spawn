@@ -11,7 +11,7 @@ import java.util.ArrayList;
 public enum WorldConfigNode implements ConfigNode{
 
     RDM_RESPAWN("random-respawns", VarType.BOOLEAN, true),
-    RDM_BEDRESPAWN("random-bedrespawn", VarType.BOOLEAN, true),
+    RDM_BEDRESPAWN("random-bedrespawn", VarType.BOOLEAN, false),
     RDM_FIRSTJOIN("random-spawn-on-firstjoin", VarType.BOOLEAN, true),
     RDM_TELEPORT_FROM("random-spawn-on-teleporting-from-this-world", VarType.BOOLEAN, false),
     RDM_TELEPORT_TO("random-spawn-on-teleporting-to-this-world", VarType.BOOLEAN, false),
@@ -32,7 +32,7 @@ public enum WorldConfigNode implements ConfigNode{
     RESPAWN_RADIUS("saved-random-spawn.spawn-in-radius-around-saved-location", VarType.INTEGER, 0),
 
     BED_OBSTRUCTED_RANDOM("obstructed-bed.spawn-randomly-around-bed", VarType.BOOLEAN, false),
-    BED_OBSTRUCTED_RADIUS("obstructed-bed.spawn-in-radius-around-obstructed-bed", VarType.DOUBLE, 0.0D),
+    BED_OBSTRUCTED_RADIUS("obstructed-bed.spawn-in-radius-around-obstructed-bed", VarType.INTEGER, 0),
 
     WORLDSPAWN_OVERRIDE("fixed-first-spawn.enable", VarType.BOOLEAN, false),
     WORLDSPAWN_X("fixed-first-spawn.x", VarType.DOUBLE, 0.0D),
