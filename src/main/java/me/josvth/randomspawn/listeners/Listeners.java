@@ -6,6 +6,7 @@ import me.josvth.randomspawn.handlers.*;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -33,11 +34,16 @@ public class Listeners implements Listener{
         globalConfig = plugin.getGlobalConfig();
     }
 
-    //TODO What does this do
+
+    /**
+     * Give players a few seconds spawnprotection after being spawned randomly
+     *
+     * @param event EntityDamageEvent that occured
+     */
     @EventHandler
     public void onDamage(EntityDamageEvent event){
-        if(event.getEntity() instanceof Player && event.getEntity().hasMetadata("lasttimerandomspawned") && !event.getCause().equals(EntityDamageEvent.DamageCause.SUICIDE)){
-            if((event.getEntity().getMetadata("lasttimerandomspawned").get(0).asLong() + (globalConfig.getInt(GlobalConfigNode.NO_DMG_TIME)*1000)) > System.currentTimeMillis()){
+        if(event.getEntity() instanceof Player &&! event.getCause().equals(EntityDamageEvent.DamageCause.SUICIDE)){
+            if((plugin.getLastRandomSpawned((Player) event.getEntity()) + (globalConfig.getInt(GlobalConfigNode.NO_DMG_TIME)*1000)) > System.currentTimeMillis()){
                 event.setCancelled(true);
             }
         }
@@ -102,7 +108,7 @@ public class Listeners implements Listener{
             player.setBedSpawnLocation(spawnLocation);
         }
 
-        showRdmRespawnMsg(player, globalConfig);
+        plugin.showRdmRespawnMsg(player, globalConfig);
     }
 
 
@@ -177,7 +183,7 @@ public class Listeners implements Listener{
                         if (cfgSaveWorldRespawn && plugin.getSpawnLocationHandler().getLocation(player, world) == null)
                             plugin.getSpawnLocationHandler().addLocation(player, location);
 
-                        showRdmRespawnMsg(player, globalConfig);
+                        plugin.showRdmRespawnMsg(player, globalConfig);
                         return;
                     }
                     break;
@@ -264,7 +270,7 @@ public class Listeners implements Listener{
                         if (cfgSaveWorldRespawn && plugin.getSpawnLocationHandler().getLocation(player, world) == null)
                             plugin.getSpawnLocationHandler().addLocation(player, location);
 
-                        showRdmRespawnMsg(player, globalConfig);
+                        plugin.showRdmRespawnMsg(player, globalConfig);
                         return;
                     }
                     break;
@@ -308,7 +314,7 @@ public class Listeners implements Listener{
                             player.setBedSpawnLocation(spawnLocation);
                         }
 
-                        showRdmRespawnMsg(player, globalConfig);
+                        plugin.showRdmRespawnMsg(player, globalConfig);
 
 
                     }else{
@@ -360,32 +366,14 @@ public class Listeners implements Listener{
 
             player.teleport(spawnLocation.add(0, 5, 0));
 
-            player.setMetadata("lasttimerandomspawned", new FixedMetadataValue(plugin, System.currentTimeMillis()));
-
             if (cfgKeepSpawn){
                 player.setBedSpawnLocation(spawnLocation);
             }
 
-            showRdmRespawnMsg(player, globalConfig);
+            plugin.showRdmRespawnMsg(player, globalConfig);
 
         }
     }
 
-    /**
-     * Show one of the available messages, only prints if enabled in config
-     */
-    public static void showRdmRespawnMsg(Player player, GlobalConfig globalConfig)
-    {
-        if (globalConfig.getBoolean(GlobalConfigNode.SHOW_RDM_SPAWN_MSG)){
-            //Choose a random message out of the available messages
-            List<String> availableMsgs = globalConfig.getStringList(GlobalConfigNode.RDM_SPAWN_MSGS);
-            String msg = "";
-            if (availableMsgs.size() > 0)
-            {
-                msg = availableMsgs.get(new Random().nextInt(availableMsgs.size()));
-            }
-            if (msg != null &&! msg.isEmpty())
-                player.sendMessage(ChatColor.translateAlternateColorCodes('&', msg));
-        }
-    }
+
 }

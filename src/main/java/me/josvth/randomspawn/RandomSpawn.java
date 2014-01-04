@@ -8,11 +8,14 @@ import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.World.Environment;
 import org.bukkit.block.Block;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
+import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
 import java.util.List;
+import java.util.Random;
 
 public class RandomSpawn extends JavaPlugin{
 
@@ -242,7 +245,12 @@ public class RandomSpawn extends JavaPlugin{
 		return y;
 	}
 
-	// Methods for a save landing :)
+
+    /**
+     * Prevent glitching into the ground or something like that
+     * @param player player to teleport
+     * @param location target to teleport to
+     */
 
 	public void sendGround(Player player, Location location){
 
@@ -256,4 +264,47 @@ public class RandomSpawn extends JavaPlugin{
 		}
 
 	}
+
+    /**
+     * Show one of the available messages, only prints if enabled in config
+     */
+    public void showRdmRespawnMsg(Player player, GlobalConfig globalConfig)
+    {
+        if (globalConfig.getBoolean(GlobalConfigNode.SHOW_RDM_SPAWN_MSG)){
+            //Choose a random message out of the available messages
+            List<String> availableMsgs = globalConfig.getStringList(GlobalConfigNode.RDM_SPAWN_MSGS);
+            String msg = "";
+            if (availableMsgs.size() > 0)
+            {
+                msg = availableMsgs.get(new Random().nextInt(availableMsgs.size()));
+            }
+            if (msg != null &&! msg.isEmpty())
+                player.sendMessage(ChatColor.translateAlternateColorCodes('&', msg));
+        }
+    }
+
+
+    /**
+     * Teleport player, send blockchanges and set metadata
+     * @param player player to teleport
+     * @param targetLoc location to teleport to
+     */
+    public void rsTeleportTo(Player player, Location targetLoc, boolean showMsg)
+    {
+        sendGround(player, targetLoc);
+        player.teleport(targetLoc);
+        setRandomSpawned(player);
+        showRdmRespawnMsg(player, globalConfig);
+    }
+
+    private final String metakey_randomspawned = "lasttimerandomspawned";
+    public void setRandomSpawned(LivingEntity entity)
+    {
+        entity.setMetadata(metakey_randomspawned, new FixedMetadataValue(this, System.currentTimeMillis()));
+    }
+
+    public long getLastRandomSpawned(LivingEntity entity)
+    {
+        return entity.hasMetadata("lasttimerandomspawned") ? entity.getMetadata("lasttimerandomspawned").get(0).asLong() : 0L;
+    }
 }
