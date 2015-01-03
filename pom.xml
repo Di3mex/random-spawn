@@ -11,14 +11,19 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.mainclass>me.josvth.randomspawn.RandomSpawn</project.mainclass>
-    <mc-version>1.7.2</mc-version>
-    <bukkit-ver>R0.2</bukkit-ver>
+    <mc-version>1.8</mc-version>
+    <bukkit-ver>R0.1-SNAPSHOT</bukkit-ver>
   </properties>
 
   <repositories>
     <repository>
       <id>bukkit-repo</id>
       <url>http://repo.bukkit.org/content/groups/public</url>
+    </repository>
+    <!-- Spigot Repo -->
+    <repository>
+      <id>md5</id>
+      <url>https://hub.spigotmc.org/nexus/content/groups/public/</url>
     </repository>
   </repositories>
 

@@ -67,7 +67,7 @@ public class RandomTeleportCommand extends AbstractCommand
                 target.setBedSpawnLocation(spawn);
 
             if (globalCfg.getBoolean(GlobalConfigNode.SHOW_RDM_SPAWN_MSG))
-                Listeners.showRdmRespawnMsg(target, globalCfg);
+                plugin.showRdmRespawnMsg(target, globalCfg);
 
             //if(target != sender)
             //    sender.sendMessage("Player: "+ target.getName() + " was random teleported!");
